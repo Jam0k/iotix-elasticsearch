@@ -77,7 +77,7 @@ def create_tables(engine):
             change_type VARCHAR(50),
             change_description TEXT,
             changed_by VARCHAR(100),
-            change_date TIMESTAMP
+            change_date DATE
         );
         """))
         connection.commit()
