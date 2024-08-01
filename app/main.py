@@ -1,9 +1,12 @@
 import os
 import time
 from fastapi import FastAPI
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 from sqlalchemy import create_engine, text, inspect
 from contextlib import asynccontextmanager
 from dotenv import load_dotenv
+from app.search import router as search_router  # Updated import statement
 
 load_dotenv()
 
@@ -115,10 +118,12 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(lifespan=lifespan)
 
+# Mount the static files directory
+app.mount("/static", StaticFiles(directory="static"), name="static")
+
+# Include the search router
+app.include_router(search_router)
+
 @app.get("/")
 async def root():
-    return {"message": "Welcome to IoTix Elasticsearch Testing"}
-
-@app.get("/assets")
-async def search_assets(query: str):
-    return {"search_results": f"Results for query: {query}"}
+    return FileResponse("static/index.html")

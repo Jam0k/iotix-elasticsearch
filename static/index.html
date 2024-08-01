@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IoTix Asset Search</title>
+    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100">
+    <div class="container mx-auto p-4" x-data="assetSearch()">
+        <h1 class="text-3xl font-bold mb-4">IoTix Asset Search</h1>
+        <div class="mb-4">
+            <input 
+                type="text" 
+                x-model="query" 
+                @input.debounce.300ms="search()"
+                placeholder="Search assets..." 
+                class="w-full p-2 border rounded"
+            >
+        </div>
+        <div id="results" class="bg-white p-4 rounded shadow">
+            <template x-if="loading">
+                <p>Loading...</p>
+            </template>
+            <template x-if="!loading && results.length === 0">
+                <p>No results found.</p>
+            </template>
+            <ul>
+                <template x-for="asset in results" :key="asset.id">
+                    <li class="mb-4 p-4 bg-gray-50 rounded shadow">
+                        <div class="font-bold" x-text="`${asset.asset_type} - ${asset.serial_number}`"></div>
+                        <div x-text="`Manufacturer: ${asset.manufacturer}`"></div>
+                        <div x-text="`Site: ${asset.site_name}`"></div>
+                        <div x-text="`IP: ${asset.ip_address}`"></div>
+                        <div x-text="`Status: ${asset.asset_status}`"></div>
+                        <div x-text="`Criticality: ${asset.criticality}`"></div>
+                    </li>
+                </template>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        function assetSearch() {
+            return {
+                query: '',
+                results: [],
+                loading: false,
+                search() {
+                    if (this.query.length < 2) {
+                        this.results = [];
+                        return;
+                    }
+                    this.loading = true;
+                    fetch(`/search?query=${encodeURIComponent(this.query)}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            this.results = data.assets;
+                            this.loading = false;
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            this.loading = false;
+                        });
+                }
+            }
+        }
+    </script>
+</body>
+</html>
