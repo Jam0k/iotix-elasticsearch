@@ -1,0 +1,63 @@
+version: '3.8'
+
+services:
+  fastapi:
+    build: .
+    container_name: iotix-fastapi
+    volumes:
+      - .:/app
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    depends_on:
+      - postgres
+      - elasticsearch
+
+  postgres:
+    image: postgres:13
+    container_name: iotix-postgres
+    env_file:
+      - .env
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: iotix-pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@iotix.com
+      PGADMIN_DEFAULT_PASSWORD: adminpassword
+    ports:
+      - "5050:80"
+    depends_on:
+      - postgres
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.14.0
+    container_name: iotix-elasticsearch
+    environment:
+      - discovery.type=single-node
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ports:
+      - "9200:9200"
+    volumes:
+      - elasticsearch_data:/usr/share/elasticsearch/data
+
+  logstash:
+    image: docker.elastic.co/logstash/logstash:7.14.0
+    container_name: iotix-logstash
+    volumes:
+      - ./logstash/pipeline:/usr/share/logstash/pipeline
+      - ./logstash/postgresql-42.2.18.jar:/usr/share/logstash/logstash-core/lib/jars/postgresql-42.2.18.jar
+    env_file:
+      - .env
+    depends_on:
+      - postgres
+      - elasticsearch
+
+volumes:
+  postgres_data:
+  elasticsearch_data:
