@@ -3,10 +3,50 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IoTix Asset Search</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <title>IoTix Asset Management</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
     <style>
+        :root {
+            --primary-color: #3498db;
+            --secondary-color: #2c3e50;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+        }
+        .navbar {
+            background-color: var(--secondary-color);
+        }
+        .navbar-brand {
+            color: white !important;
+            font-weight: bold;
+        }
+        .main-content {
+            min-height: calc(100vh - 160px);
+        }
+        .footer {
+            background-color: var(--secondary-color);
+            color: white;
+            padding: 1rem 0;
+        }
+        .card {
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+        .card:hover {
+            box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+            transform: translateY(-5px);
+        }
+        .btn-primary {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+        .btn-primary:hover {
+            background-color: #2980b9;
+            border-color: #2980b9;
+        }
         .dropdown-results {
             position: absolute;
             width: 100%;
@@ -16,156 +56,578 @@
             border-radius: 0 0 0.25rem 0.25rem;
             max-height: 300px;
             overflow-y: auto;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
         mark {
-            background-color: yellow;
+            background-color: #ffeaa7;
             padding: 0;
+        }
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid var(--primary-color);
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
     </style>
 </head>
 <body>
-    <div class="container mt-5" x-data="assetSearch()">
-        <h1 class="mb-4">IoTix Asset Search</h1>
-        <div class="mb-4 position-relative">
-            <input 
-                type="text" 
-                x-model="query" 
-                @input.debounce.300ms="search()"
-                @focus="showDropdown = true"
-                @blur="setTimeout(() => showDropdown = false, 200)"
-                placeholder="Search assets..." 
-                class="form-control"
-            >
-            <div x-show="showDropdown && results.length > 0" class="dropdown-results">
-                <ul class="list-group">
-                    <template x-for="asset in results.slice(0, 10)" :key="asset.id">
-                        <li class="list-group-item" @mousedown="selectAsset(asset)">
-                            <div x-html="highlightMatch(asset.asset_type, query)"></div>
-                            <small class="text-muted" x-html="highlightMatch(`${asset.serial_number || ''} | ${asset.mac_address || ''}`, query)"></small>
-                            <template x-for="(value, key) in asset" :key="key">
-                                <div x-show="shouldShowField(key, value)">
-                                    <small x-html="formatFieldValue(key, value)"></small>
-                                </div>
-                            </template>
-                        </li>
-                    </template>
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand" href="#">
+                <i class="fas fa-network-wired me-2"></i>IoTix Asset Management
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="#">Dashboard</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Assets</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Reports</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Settings</a>
+                    </li>
                 </ul>
             </div>
         </div>
-        <div id="selected-asset" class="card" x-show="selectedAsset">
-            <div class="card-body">
-                <h5 class="card-title" x-text="selectedAsset?.asset_type"></h5>
-                <h6 class="card-subtitle mb-2 text-muted" x-text="selectedAsset ? `${selectedAsset.serial_number || ''} | ${selectedAsset.mac_address || ''}` : ''"></h6>
-                <p class="card-text" x-text="selectedAsset ? `Manufacturer: ${selectedAsset.manufacturer || ''}` : ''"></p>
-                <p class="card-text" x-text="selectedAsset ? `Site: ${selectedAsset.site_name || ''}` : ''"></p>
-                <p class="card-text" x-text="selectedAsset ? `IP: ${selectedAsset.ip_address || ''}` : ''"></p>
-                <p class="card-text" x-text="selectedAsset ? `Status: ${selectedAsset.asset_status || ''}` : ''"></p>
-                <p class="card-text" x-text="selectedAsset ? `Criticality: ${selectedAsset.criticality || ''}` : ''"></p>
-                <button @click="openModal()" class="btn btn-primary">View Details</button>
+    </nav>
+
+    <div class="container mt-4 main-content" x-data="assetSearch()">
+        <div class="row">
+            <div class="col-lg-8 mx-auto">
+                <div class="card">
+                    <div class="card-body">
+                        <h2 class="card-title mb-4">Asset Search</h2>
+                        <div class="mb-4 position-relative">
+                            <input 
+                                type="text" 
+                                x-model="query" 
+                                @input.debounce.300ms="search()"
+                                @focus="showDropdown = true"
+                                @blur="setTimeout(() => showDropdown = false, 200)"
+                                placeholder="Search assets by type, serial number, MAC address..." 
+                                class="form-control form-control-lg"
+                            >
+                            <div x-show="loading" class="position-absolute top-50 end-0 translate-middle-y me-3">
+                                <div class="spinner-border text-primary" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                            </div>
+                            <div x-show="showDropdown && results.length > 0" class="dropdown-results">
+                                <ul class="list-group">
+                                    <template x-for="asset in results.slice(0, 10)" :key="asset.id">
+                                        <li class="list-group-item" @mousedown="selectAsset(asset)">
+                                            <div x-html="highlightMatch(asset.asset_type, query)"></div>
+                                            <small class="text-muted" x-html="highlightMatch(`${asset.serial_number || ''} | ${asset.mac_address || ''}`, query)"></small>
+                                            <template x-for="(value, key) in asset" :key="key">
+                                                <div x-show="shouldShowField(key, value)">
+                                                    <small x-html="formatFieldValue(key, value)"></small>
+                                                </div>
+                                            </template>
+                                        </li>
+                                    </template>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="selected-asset" class="card mt-4" x-show="selectedAsset">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0" x-text="selectedAsset?.asset_type"></h5>
+                    </div>
+                    <div class="card-body">
+                        <h6 class="card-subtitle mb-2 text-muted" x-text="selectedAsset ? `${selectedAsset.serial_number || ''} | ${selectedAsset.mac_address || ''}` : ''"></h6>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p class="card-text"><strong>Manufacturer:</strong> <span x-text="selectedAsset?.manufacturer || 'N/A'"></span></p>
+                                <p class="card-text"><strong>Site:</strong> <span x-text="selectedAsset?.site_name || 'N/A'"></span></p>
+                                <p class="card-text"><strong>IP Address:</strong> <span x-text="selectedAsset?.ip_address || 'N/A'"></span></p>
+                            </div>
+                            <div class="col-md-6">
+                                <p class="card-text"><strong>Status:</strong> <span x-text="selectedAsset?.asset_status || 'N/A'"></span></p>
+                                <p class="card-text"><strong>Criticality:</strong> <span x-text="selectedAsset?.criticality || 'N/A'"></span></p>
+                            </div>
+                        </div>
+                        <button @click="openModal()" class="btn btn-primary mt-3">
+                            <i class="fas fa-info-circle me-2"></i>View Details
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- Modal -->
-    <div class="modal fade" id="assetModal" tabindex="-1" aria-labelledby="assetModalLabel" aria-hidden="true" x-data>
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="assetModalLabel" x-text="$store.assetSearch.selectedAsset?.asset_type"></h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <template x-if="$store.assetSearch.selectedAsset">
-                        <div>
-                            <template x-for="(value, key) in $store.assetSearch.selectedAsset" :key="key">
-                                <p>
-                                    <strong x-text="`${key}: `"></strong>
-                                    <span x-text="value !== null && value !== undefined ? value : 'N/A'"></span>
-                                </p>
-                            </template>
+   <!-- Modal -->
+<div class="modal fade" id="assetModal" tabindex="-1" aria-labelledby="assetModalLabel" aria-hidden="true" x-data="assetModalData()">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="assetModalLabel" x-text="asset.asset_type"></h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="nav flex-column nav-pills" id="v-pills-tab" role="tablist" aria-orientation="vertical">
+                            <button class="nav-link active" id="v-pills-identification-tab" data-bs-toggle="pill" data-bs-target="#v-pills-identification" type="button" role="tab">Asset Identification</button>
+                            <button class="nav-link" id="v-pills-location-tab" data-bs-toggle="pill" data-bs-target="#v-pills-location" type="button" role="tab">Location Information</button>
+                            <button class="nav-link" id="v-pills-technical-tab" data-bs-toggle="pill" data-bs-target="#v-pills-technical" type="button" role="tab">Technical Specifications</button>
+                            <button class="nav-link" id="v-pills-network-tab" data-bs-toggle="pill" data-bs-target="#v-pills-network" type="button" role="tab">Network and Security</button>
+                            <button class="nav-link" id="v-pills-maintenance-tab" data-bs-toggle="pill" data-bs-target="#v-pills-maintenance" type="button" role="tab">Maintenance and Support</button>
+                            <button class="nav-link" id="v-pills-financial-tab" data-bs-toggle="pill" data-bs-target="#v-pills-financial" type="button" role="tab">Financial Information</button>
+                            <button class="nav-link" id="v-pills-status-tab" data-bs-toggle="pill" data-bs-target="#v-pills-status" type="button" role="tab">Status and Criticality</button>
+                            <button class="nav-link" id="v-pills-responsibility-tab" data-bs-toggle="pill" data-bs-target="#v-pills-responsibility" type="button" role="tab">Responsibility and Compliance</button>
+                            <button class="nav-link" id="v-pills-additional-tab" data-bs-toggle="pill" data-bs-target="#v-pills-additional" type="button" role="tab">Additional Information</button>
                         </div>
-                    </template>
+                    </div>
+                    <div class="col-md-9">
+                        <div class="tab-content" id="v-pills-tabContent">
+                            <div class="tab-pane fade show active" id="v-pills-identification" role="tabpanel">
+                                <h6 class="mb-3">Asset Identification</h6>
+                                <div class="mb-3">
+                                    <label for="asset_type" class="form-label">Asset or Component</label>
+                                    <input type="text" class="form-control" id="asset_type" x-model="asset.asset_type">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="serial_number" class="form-label">Serial Number</label>
+                                    <input type="text" class="form-control" id="serial_number" x-model="asset.serial_number">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="part_no" class="form-label">Part No</label>
+                                    <input type="text" class="form-control" id="part_no" x-model="asset.part_no">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="product_range" class="form-label">Product Range</label>
+                                    <input type="text" class="form-control" id="product_range" x-model="asset.product_range">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="card_type" class="form-label">Card Type</label>
+                                    <input type="text" class="form-control" id="card_type" x-model="asset.card_type">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="part_description" class="form-label">Part Description</label>
+                                    <textarea class="form-control" id="part_description" x-model="asset.part_description"></textarea>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="manufacturer" class="form-label">Manufacturer</label>
+                                    <input type="text" class="form-control" id="manufacturer" x-model="asset.manufacturer">
+                                </div>
+                            </div>
+                            <div class="tab-pane fade" id="v-pills-location" role="tabpanel">
+                                <h6 class="mb-3">Location Information</h6>
+                                <div class="mb-3">
+                                    <label for="site_id" class="form-label">Site ID</label>
+                                    <input type="text" class="form-control" id="site_id" x-model="asset.site_id">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="site_name" class="form-label">Site Name</label>
+                                    <input type="text" class="form-control" id="site_name" x-model="asset.site_name">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="area" class="form-label">Area</label>
+                                    <input type="text" class="form-control" id="area" x-model="asset.area">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="site_type" class="form-label">Site Type</label>
+                                    <select class="form-select" id="site_type" x-model="asset.site_type">
+                                        <option value="">Select Site Type</option>
+                                        <option value="Production">Production</option>
+                                        <option value="Distribution">Distribution</option>
+                                        <option value="Office">Office</option>
+                                        <option value="Data Center">Data Center</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="mcc_no" class="form-label">MCC No</label>
+                                    <input type="text" class="form-control" id="mcc_no" x-model="asset.mcc_no">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="mcc_location" class="form-label">MCC Location</label>
+                                    <input type="text" class="form-control" id="mcc_location" x-model="asset.mcc_location">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="process_area" class="form-label">Process Area</label>
+                                    <input type="text" class="form-control" id="process_area" x-model="asset.process_area">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="physical_location_coordinates" class="form-label">Physical Location Coordinates</label>
+                                    <input type="text" class="form-control" id="physical_location_coordinates" x-model="asset.physical_location_coordinates">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="secure_location" class="form-label">Secure Location</label>
+                                    <select class="form-select" id="secure_location" x-model="asset.secure_location">
+                                        <option value="">Select</option>
+                                        <option value="Yes">Yes</option>
+                                        <option value="No">No</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="tab-pane fade" id="v-pills-technical" role="tabpanel">
+                                <h6 class="mb-3">Technical Specifications</h6>
+                                <div class="mb-3">
+                                    <label for="firmware_revision" class="form-label">Firmware Revision</label>
+                                    <input type="text" class="form-control" id="firmware_revision" x-model="asset.firmware_revision">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="software_compiler" class="form-label">Software Compiler</label>
+                                    <input type="text" class="form-control" id="software_compiler" x-model="asset.software_compiler">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="operating_system" class="form-label">Operating System</label>
+                                    <input type="text" class="form-control" id="operating_system" x-model="asset.operating_system">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="os_version" class="form-label">OS Version</label>
+                                    <input type="text" class="form-control" id="os_version" x-model="asset.os_version">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="power_supply" class="form-label">Power Supply</label>
+                                    <input type="text" class="form-control" id="power_supply" x-model="asset.power_supply">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="ip_address" class="form-label">IP Address</label>
+                                    <input type="text" class="form-control" id="ip_address" x-model="asset.ip_address">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="dns_name" class="form-label">DNS Name</label>
+                                    <input type="text" class="form-control" id="dns_name" x-model="asset.dns_name">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="mac_address" class="form-label">MAC Address</label>
+                                    <input type="text" class="form-control" id="mac_address" x-model="asset.mac_address">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="communication_protocols" class="form-label">Communication Protocols</label>
+                                    <input type="text" class="form-control" id="communication_protocols" x-model="asset.communication_protocols">
+                                </div>
+                            </div>
+                            <div class="tab-pane fade" id="v-pills-network" role="tabpanel">
+                                <h6 class="mb-3">Network and Security</h6>
+                                <div class="mb-3">
+                                    <label for="remote_access" class="form-label">Remote Access</label>
+                                    <select class="form-select" id="remote_access" x-model="asset.remote_access">
+                                        <option value="">Select</option>
+                                        <option value="Enabled">Enabled</option>
+                                        <option value="Disabled">Disabled</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="syslog" class="form-label">Syslog</label>
+                                    <select class="form-select" id="syslog" x-model="asset.syslog">
+                                        <option value="">Select</option>
+                                        <option value="Enabled">Enabled</option>
+                                        <option value="Disabled">Disabled</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="network_zone" class="form-label">Network Zone</label>
+                                    <input type="text" class="form-control" id="network_zone" x-model="asset.network_zone">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="cybersecurity_patch_status" class="form-label">Cybersecurity Patch Status</label>
+                                    <input type="text" class="form-control" id="cybersecurity_patch_status" x-model="asset.cybersecurity_patch_status">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="last_vulnerability_scan_date" class="form-label">Last Vulnerability Scan Date</label>
+                                    <input type="date" class="form-control" id="last_vulnerability_scan_date" x-model="asset.last_vulnerability_scan_date">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="risk_assessment_score" class="form-label">Risk Assessment Score</label>
+                                    <input type="number" class="form-control" id="risk_assessment_score" x-model="asset.risk_assessment_score">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="data_classification" class="form-label">Data Classification</label>
+                                    <select class="form-select" id="data_classification" x-model="asset.data_classification">
+                                        <option value="">Select</option>
+                                        <option value="Public">Public</option>
+                                        <option value="Internal">Internal</option>
+                                        <option value="Confidential">Confidential</option>
+                                        <option value="Restricted">Restricted</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="tab-pane fade" id="v-pills-maintenance" role="tabpanel">
+                                <h6 class="mb-3">Maintenance and Support</h6>
+                                <div class="mb-3">
+                                    <label for="installation_date" class="form-label">Installation Date</label>
+                                    <input type="date" class="form-control" id="installation_date" x-model="asset.installation_date">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="last_maintenance_date" class="form-label">Last Maintenance Date</label>
+                                    <input type="date" class="form-control" id="last_maintenance_date" x-model="asset.last_maintenance_date">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="next_scheduled_maintenance" class="form-label">Next Scheduled Maintenance</label>
+                                    <input type="date" class="form-control" id="next_scheduled_maintenance" x-model="asset.next_scheduled_maintenance">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="warranty_expiration_date" class="form-label">Warranty Expiration Date</label>
+                                    <input type="date" class="form-control" id="warranty_expiration_date" x-model="asset.warranty_expiration_date">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="change_management" class="form-label">Change Management</label>
+                                    <textarea class="form-control" id="change_management" x-model="asset.change_management"></textarea>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="vendor_support_contract" class="form-label">Vendor Support Contract</label>
+                                    <input type="text" class="form-control" id="vendor_support_contract" x-model="asset.vendor_support_contract">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="support_contract_expiration" class="form-label">Support Contract Expiration</label>
+                                    <input type="date" class="form-control" id="support_contract_expiration" x-model="asset.support_contract_expiration">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="backup_frequency" class="form-label">Backup Frequency</label>
+                                    <select class="form-select" id="backup_frequency" x-model="asset.backup_frequency">
+                                        <option value="">Select Frequency</option>
+                                        <option value="Daily">Daily</option>
+                                        <option value="Weekly">Weekly</option>
+                                        <option value="Monthly">Monthly</option>
+                                        <option value="Quarterly">Quarterly</option>
+                                        <option value="Annually">Annually</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="tab-pane fade" id="v-pills-financial" role="tabpanel">
+                                <h6 class="mb-3">Financial Information</h6>
+                                <div class="mb-3">
+                                    <label for="purchase_cost" class="form-label">Purchase Cost</label>
+                                    <input type="number" step="0.01" class="form-control" id="purchase_cost" x-model="asset.purchase_cost">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="depreciation_value" class="form-label">Depreciation Value</label>
+                                    <input type="number" step="0.01" class="form-control" id="depreciation_value" x-model="asset.depreciation_value">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="expected_lifespan" class="form-label">Expected Lifespan (years)</label>
+                                    <input type="number" class="form-control" id="expected_lifespan" x-model="asset.expected_lifespan">
+                                </div>
+                            </div>
+                            <div class="tab-pane fade" id="v-pills-status" role="tabpanel">
+                                <h6 class="mb-3">Status and Criticality</h6>
+                                <div class="mb-3">
+                                    <label for="asset_status" class="form-label">Asset Status</label>
+                                    <select class="form-select" id="asset_status" x-model="asset.asset_status">
+                                        <option value="">Select Status</option>
+                                        <option value="Active">Active</option>
+                                        <option value="Inactive">Inactive</option>
+                                        <option value="Maintenance">Maintenance</option>
+                                        <option value="Retired">Retired</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="obsolete" class="form-label">Obsolete</label>
+                                    <select class="form-select" id="obsolete" x-model="asset.obsolete">
+                                        <option value="">Select</option>
+                                        <option value="Yes">Yes</option>
+                                        <option value="No">No</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="criticality" class="form-label">Criticality</label>
+                                    <select class="form-select" id="criticality" x-model="asset.criticality">
+                                        <option value="">Select Criticality</option>
+                                        <option value="Low">Low</option>
+                                        <option value="Medium">Medium</option>
+                                        <option value="High">High</option>
+                                        <option value="Critical">Critical</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="tab-pane fade" id="v-pills-responsibility" role="tabpanel">
+                                <h6 class="mb-3">Responsibility and Compliance</h6>
+                                <div class="mb-3">
+                                    <label for="responsible_department" class="form-label">Responsible Department</label>
+                                    <input type="text" class="form-control" id="responsible_department" x-model="asset.responsible_department">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="primary_contact_person" class="form-label">Primary Contact Person</label>
+                                    <input type="text" class="form-control" id="primary_contact_person" x-model="asset.primary_contact_person">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="backup_contact_person" class="form-label">Backup Contact Person</label>
+                                    <input type="text" class="form-control" id="backup_contact_person" x-model="asset.backup_contact_person">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="compliance_requirements" class="form-label">Compliance Requirements</label>
+                                    <textarea class="form-control" id="compliance_requirements" x-model="asset.compliance_requirements"></textarea>
+                                </div>
+                            </div>
+                            <div class="tab-pane fade" id="v-pills-additional" role="tabpanel">
+                                <h6 class="mb-3">Additional Information</h6>
+                                <div class="mb-3">
+                                    <label for="custom_configurations" class="form-label">Custom Configurations</label>
+                                    <textarea class="form-control" id="custom_configurations" x-model="asset.custom_configurations"></textarea>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="connected_devices" class="form-label">Connected Devices</label>
+                                    <textarea class="form-control" id="connected_devices" x-model="asset.connected_devices"></textarea>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="failure_history" class="form-label">Failure History</label>
+                                    <textarea class="form-control" id="failure_history" x-model="asset.failure_history"></textarea>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="created_date" class="form-label">Created Date</label>
+                                    <input type="date" class="form-control" id="created_date" x-model="asset.created_date" readonly>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="modified_date" class="form-label">Modified Date</label>
+                                    <input type="date" class="form-control" id="modified_date" x-model="asset.modified_date" readonly>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="history_tracking" class="form-label">History (Audit) Tracking</label>
+                                    <textarea class="form-control" id="history_tracking" x-model="asset.history_tracking" readonly></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" @click="saveAsset()">
+                    <i class="fas fa-save me-2"></i>Save Changes
+                </button>
             </div>
         </div>
     </div>
+</div>
+
+    <footer class="footer mt-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <p>&copy; 2024 IoTix Asset Management. All rights reserved.</p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <a href="#" class="text-white me-3">Privacy Policy</a>
+                    <a href="#" class="text-white">Terms of Service</a>
+                </div>
+            </div>
+        </div>
+    </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        document.addEventListener('alpine:init', () => {
-            Alpine.store('assetSearch', {
-                selectedAsset: null
-            })
-        })
+ document.addEventListener('alpine:init', () => {
+    Alpine.store('assetSearch', {
+        selectedAsset: null
+    })
+})
 
-        function assetSearch() {
-            return {
-                query: '',
-                results: [],
-                loading: false,
-                showDropdown: false,
-                modal: null,
-                init() {
-                    this.modal = new bootstrap.Modal(document.getElementById('assetModal'));
-                },
-                search() {
-                    if (this.query.length < 2) {
-                        this.results = [];
-                        return;
-                    }
-                    this.loading = true;
-                    fetch(`/search?query=${encodeURIComponent(this.query)}`)
-                        .then(response => response.json())
-                        .then(data => {
-                            this.results = data.assets.filter(asset => 
-                                Object.entries(asset).some(([key, value]) => {
-                                    if (value === null || value === undefined) return false;
-                                    return value.toString().toLowerCase().includes(this.query.toLowerCase());
-                                })
-                            );
-                            this.loading = false;
-                            this.showDropdown = true;
-                        })
-                        .catch(error => {
-                            console.error('Error:', error);
-                            this.loading = false;
-                        });
-                },
-                selectAsset(asset) {
-                    Alpine.store('assetSearch').selectedAsset = asset;
-                    this.query = asset.asset_type;
-                    this.showDropdown = false;
-                },
-                openModal() {
-                    if (Alpine.store('assetSearch').selectedAsset) {
-                        this.modal.show();
-                    }
-                },
-                get selectedAsset() {
-                    return Alpine.store('assetSearch').selectedAsset;
-                },
-                highlightMatch(text, query) {
-                    if (!query || text === null || text === undefined) return text;
-                    const regex = new RegExp(`(${query})`, 'gi');
-                    return text.toString().replace(regex, '<mark>$1</mark>');
-                },
-                shouldShowField(key, value) {
-                    return key !== 'asset_type' && 
-                           key !== 'serial_number' && 
-                           key !== 'mac_address' && 
-                           value !== null && 
-                           value !== undefined && 
-                           value.toString().toLowerCase().includes(this.query.toLowerCase());
-                },
-                formatFieldValue(key, value) {
-                    if (value === null || value === undefined) return '';
-                    return `${key}: ${this.highlightMatch(value.toString(), this.query)}`;
-                }
+function assetSearch() {
+    return {
+        query: '',
+        results: [],
+        loading: false,
+        showDropdown: false,
+        modal: null,
+        init() {
+            this.modal = new bootstrap.Modal(document.getElementById('assetModal'));
+        },
+        search() {
+            if (this.query.length < 2) {
+                this.results = [];
+                return;
             }
+            this.loading = true;
+            fetch(`/search?query=${encodeURIComponent(this.query)}`)
+                .then(response => response.json())
+                .then(data => {
+                    this.results = data.assets.filter(asset => 
+                        Object.entries(asset).some(([key, value]) => {
+                            if (value === null || value === undefined) return false;
+                            return value.toString().toLowerCase().includes(this.query.toLowerCase());
+                        })
+                    );
+                    this.loading = false;
+                    this.showDropdown = true;
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    this.loading = false;
+                });
+        },
+        selectAsset(asset) {
+            Alpine.store('assetSearch').selectedAsset = asset;
+            this.query = asset.asset_type;
+            this.showDropdown = false;
+        },
+        openModal() {
+            if (Alpine.store('assetSearch').selectedAsset) {
+                this.modal.show();
+                // Trigger an event to notify the modal that it should update
+                window.dispatchEvent(new CustomEvent('update-asset-modal'));
+            }
+        },
+        get selectedAsset() {
+            return Alpine.store('assetSearch').selectedAsset;
+        },
+        highlightMatch(text, query) {
+            if (!query || text === null || text === undefined) return text;
+            const regex = new RegExp(`(${query})`, 'gi');
+            return text.toString().replace(regex, '<mark>$1</mark>');
+        },
+        shouldShowField(key, value) {
+            return key !== 'asset_type' && 
+                   key !== 'serial_number' && 
+                   key !== 'mac_address' && 
+                   value !== null && 
+                   value !== undefined && 
+                   value.toString().toLowerCase().includes(this.query.toLowerCase());
+        },
+        formatFieldValue(key, value) {
+            if (value === null || value === undefined) return '';
+            return `${key}: ${this.highlightMatch(value.toString(), this.query)}`;
         }
+    }
+}
+
+function assetModalData() {
+    return {
+        asset: {
+            // ... (keep all the empty string initializations)
+        },
+        init() {
+            this.updateAssetData();
+            // Listen for updates from the main component
+            window.addEventListener('update-asset-modal', () => this.updateAssetData());
+        },
+        updateAssetData() {
+            const selectedAsset = Alpine.store('assetSearch').selectedAsset;
+            if (selectedAsset) {
+                // Merge the selected asset data with the existing asset object
+                this.asset = { ...this.asset, ...selectedAsset };
+            }
+        },
+        saveAsset() {
+            console.log('Saving asset:', this.asset);
+            // Implement your save logic here
+            
+            // After saving, update the store
+            Alpine.store('assetSearch').selectedAsset = { ...this.asset };
+            
+            // Close the modal
+            const modal = bootstrap.Modal.getInstance(document.getElementById('assetModal'));
+            modal.hide();
+        }
+    }
+}
     </script>
 </body>
 </html>
