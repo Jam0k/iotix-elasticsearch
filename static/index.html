@@ -134,6 +134,12 @@
                                         <li class="list-group-item" @mousedown="selectAsset(asset)">
                                             <div x-html="highlightMatch(asset.asset_type, query)"></div>
                                             <small class="text-muted" x-html="highlightMatch(`${asset.serial_number || ''} | ${asset.mac_address || ''}`, query)"></small>
+                                            <div class="mt-1">
+                                                <small class="text-muted">Matched:</small>
+                                                <template x-for="field in asset.matchingFields" :key="field.key">
+                                                    <span class="badge bg-light text-dark me-1 mb-1" x-html="formatFieldValue(field.key, field.value)"></span>
+                                                </template>
+                                            </div>
                                         </li>
                                     </template>
                                 </ul>
@@ -524,12 +530,10 @@ function assetSearch() {
             fetch(`/search?query=${encodeURIComponent(this.query)}`)
                 .then(response => response.json())
                 .then(data => {
-                    this.results = data.assets.filter(asset => 
-                        Object.entries(asset).some(([key, value]) => {
-                            if (value === null || value === undefined) return false;
-                            return value.toString().toLowerCase().includes(this.query.toLowerCase());
-                        })
-                    );
+                    this.results = data.assets.map(asset => {
+                        const matchingFields = this.findMatchingFields(asset, this.query);
+                        return { ...asset, matchingFields };
+                    }).filter(asset => asset.matchingFields.length > 0);
                     this.loading = false;
                     this.showDropdown = true;
                 })
@@ -537,6 +541,15 @@ function assetSearch() {
                     console.error('Error:', error);
                     this.loading = false;
                 });
+        },
+        findMatchingFields(asset, query) {
+            return Object.entries(asset)
+                .filter(([key, value]) => 
+                    value !== null && 
+                    value !== undefined && 
+                    value.toString().toLowerCase().includes(query.toLowerCase())
+                )
+                .map(([key, value]) => ({ key, value }));
         },
         selectAsset(asset) {
             Alpine.store('assetSearch').selectedAsset = asset;
@@ -547,7 +560,6 @@ function assetSearch() {
         openModal() {
             if (Alpine.store('assetSearch').selectedAsset) {
                 this.modal.show();
-                // Trigger an event to notify the modal that it should update
                 window.dispatchEvent(new CustomEvent('update-asset-modal'));
             }
         },
