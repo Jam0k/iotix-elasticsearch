@@ -2,7 +2,7 @@ from elasticsearch import Elasticsearch
 from fastapi import APIRouter, HTTPException, Query
 from typing import Optional, List
 import os
-from datetime import datetime
+from datetime import datetime, timedelta
 import re
 
 router = APIRouter()
@@ -86,11 +86,11 @@ async def search_assets(
             }
         ]
 
-        # Add exact match queries for specific fields
+        # Add wildcard queries for specific fields
         for field in ["serial_number", "ip_address", "mac_address"]:
             should_clauses.append({
-                "term": {
-                    f"{field}.keyword": query.lower()
+                "wildcard": {
+                    f"{field}.keyword": f"*{query.lower()}*"
                 }
             })
 
