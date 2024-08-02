@@ -58,14 +58,6 @@ async def search_assets(
             "primary_contact_person", "compliance_requirements", "part_no", "mcc_location", "area"
         ]
 
-        # Fields that should be searched with .keyword for exact matches
-        keyword_fields = [
-            "card_type", "manufacturer", "site_name", "site_type", "asset_status",
-            "operating_system", "mcc_no", "data_classification", "backup_frequency",
-            "responsible_department", "criticality", "site_id", "process_area",
-            "power_supply", "product_range", "asset_type", "network_zone", "part_no"
-        ]
-
         # Date fields
         date_fields = [
             "next_scheduled_maintenance", "warranty_expiration_date", "support_contract_expiration",
@@ -74,25 +66,28 @@ async def search_assets(
         ]
 
         # Construct the query
-        should_clauses = [
-            {
-                "multi_match": {
-                    "query": query,
-                    "fields": [f"{field}^1" for field in searchable_fields if field not in keyword_fields] +
-                              [f"{field}.keyword^2" for field in keyword_fields],
-                    "type": "best_fields",
-                    "fuzziness": "AUTO"
+        should_clauses = []
+        
+        for field in searchable_fields:
+            should_clauses.extend([
+                {
+                    "prefix": {
+                        field: {
+                            "value": query.lower(),
+                            "boost": 2.0
+                        }
+                    }
+                },
+                {
+                    "match": {
+                        field: {
+                            "query": query,
+                            "fuzziness": "AUTO",
+                            "prefix_length": 1
+                        }
+                    }
                 }
-            }
-        ]
-
-        # Add exact match queries for specific fields
-        for field in ["serial_number", "ip_address", "mac_address"]:
-            should_clauses.append({
-                "term": {
-                    f"{field}.keyword": query.lower()
-                }
-            })
+            ])
 
         # Handle date queries
         start_date, end_date = parse_date_query(query)
@@ -110,14 +105,17 @@ async def search_assets(
         body = {
             "query": {
                 "bool": {
-                    "should": should_clauses
+                    "should": should_clauses,
+                    "minimum_should_match": 1
                 }
             },
             "from": from_index,
             "size": size,
             "sort": [{sort_field: {"order": sort_order}}],
             "highlight": {
-                "fields": {field: {} for field in searchable_fields + date_fields}
+                "fields": {field: {} for field in searchable_fields + date_fields},
+                "pre_tags": ["<mark>"],
+                "post_tags": ["</mark>"]
             },
             "aggs": {
                 "asset_types": {"terms": {"field": "asset_type.keyword"}},
@@ -130,14 +128,25 @@ async def search_assets(
         result = es.search(index="assets", body=body)
         
         hits = result['hits']['hits']
-        assets = [
-            {
+        assets = []
+        for hit in hits:
+            asset = {
                 "id": hit["_id"],
                 "score": hit["_score"],
                 "highlight": hit.get("highlight", {}),
+                "badges": [],
                 **hit["_source"]
-            } for hit in hits
-        ]
+            }
+            
+            # Generate badges for matching fields
+            for field, highlights in hit.get("highlight", {}).items():
+                if highlights:
+                    asset["badges"].append({
+                        "field": field,
+                        "value": highlights[0].replace("<mark>", "").replace("</mark>", "")
+                    })
+            
+            assets.append(asset)
 
         return {
             "total": result['hits']['total']['value'],
