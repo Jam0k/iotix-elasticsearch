@@ -50,6 +50,8 @@
         .dropdown-results {
             position: absolute;
             width: 100%;
+            top: 100%;
+            left: 0; 
             z-index: 1000;
             background-color: white;
             border: 1px solid #ced4da;
@@ -132,39 +134,11 @@
                                         <li class="list-group-item" @mousedown="selectAsset(asset)">
                                             <div x-html="highlightMatch(asset.asset_type, query)"></div>
                                             <small class="text-muted" x-html="highlightMatch(`${asset.serial_number || ''} | ${asset.mac_address || ''}`, query)"></small>
-                                            <template x-for="(value, key) in asset" :key="key">
-                                                <div x-show="shouldShowField(key, value)">
-                                                    <small x-html="formatFieldValue(key, value)"></small>
-                                                </div>
-                                            </template>
                                         </li>
                                     </template>
                                 </ul>
                             </div>
                         </div>
-                    </div>
-                </div>
-
-                <div id="selected-asset" class="card mt-4" x-show="selectedAsset">
-                    <div class="card-header bg-primary text-white">
-                        <h5 class="mb-0" x-text="selectedAsset?.asset_type"></h5>
-                    </div>
-                    <div class="card-body">
-                        <h6 class="card-subtitle mb-2 text-muted" x-text="selectedAsset ? `${selectedAsset.serial_number || ''} | ${selectedAsset.mac_address || ''}` : ''"></h6>
-                        <div class="row">
-                            <div class="col-md-6">
-                                <p class="card-text"><strong>Manufacturer:</strong> <span x-text="selectedAsset?.manufacturer || 'N/A'"></span></p>
-                                <p class="card-text"><strong>Site:</strong> <span x-text="selectedAsset?.site_name || 'N/A'"></span></p>
-                                <p class="card-text"><strong>IP Address:</strong> <span x-text="selectedAsset?.ip_address || 'N/A'"></span></p>
-                            </div>
-                            <div class="col-md-6">
-                                <p class="card-text"><strong>Status:</strong> <span x-text="selectedAsset?.asset_status || 'N/A'"></span></p>
-                                <p class="card-text"><strong>Criticality:</strong> <span x-text="selectedAsset?.criticality || 'N/A'"></span></p>
-                            </div>
-                        </div>
-                        <button @click="openModal()" class="btn btn-primary mt-3">
-                            <i class="fas fa-info-circle me-2"></i>View Details
-                        </button>
                     </div>
                 </div>
             </div>
@@ -543,6 +517,7 @@ function assetSearch() {
         search() {
             if (this.query.length < 2) {
                 this.results = [];
+                this.showDropdown = false;
                 return;
             }
             this.loading = true;
@@ -565,8 +540,9 @@ function assetSearch() {
         },
         selectAsset(asset) {
             Alpine.store('assetSearch').selectedAsset = asset;
-            this.query = asset.asset_type;
+            this.query = '';
             this.showDropdown = false;
+            this.openModal();
         },
         openModal() {
             if (Alpine.store('assetSearch').selectedAsset) {
@@ -575,21 +551,10 @@ function assetSearch() {
                 window.dispatchEvent(new CustomEvent('update-asset-modal'));
             }
         },
-        get selectedAsset() {
-            return Alpine.store('assetSearch').selectedAsset;
-        },
         highlightMatch(text, query) {
             if (!query || text === null || text === undefined) return text;
             const regex = new RegExp(`(${query})`, 'gi');
             return text.toString().replace(regex, '<mark>$1</mark>');
-        },
-        shouldShowField(key, value) {
-            return key !== 'asset_type' && 
-                   key !== 'serial_number' && 
-                   key !== 'mac_address' && 
-                   value !== null && 
-                   value !== undefined && 
-                   value.toString().toLowerCase().includes(this.query.toLowerCase());
         },
         formatFieldValue(key, value) {
             if (value === null || value === undefined) return '';
@@ -600,19 +565,15 @@ function assetSearch() {
 
 function assetModalData() {
     return {
-        asset: {
-            // ... (keep all the empty string initializations)
-        },
+        asset: {},
         init() {
             this.updateAssetData();
-            // Listen for updates from the main component
             window.addEventListener('update-asset-modal', () => this.updateAssetData());
         },
         updateAssetData() {
             const selectedAsset = Alpine.store('assetSearch').selectedAsset;
             if (selectedAsset) {
-                // Merge the selected asset data with the existing asset object
-                this.asset = { ...this.asset, ...selectedAsset };
+                this.asset = { ...selectedAsset };
             }
         },
         saveAsset() {
@@ -628,6 +589,7 @@ function assetModalData() {
         }
     }
 }
+
     </script>
 </body>
 </html>
