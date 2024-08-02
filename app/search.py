@@ -86,11 +86,11 @@ async def search_assets(
             }
         ]
 
-        # Add wildcard queries for specific fields
+        # Add exact match queries for specific fields
         for field in ["serial_number", "ip_address", "mac_address"]:
             should_clauses.append({
-                "wildcard": {
-                    f"{field}.keyword": f"*{query.lower()}*"
+                "term": {
+                    f"{field}.keyword": query.lower()
                 }
             })
 
