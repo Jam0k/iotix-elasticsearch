@@ -187,13 +187,16 @@
                                             </div>
                                             <div class="flex-grow-1">
                                                 <div class="d-flex justify-content-between align-items-center">
-                                                    <strong x-html="highlightMatch(asset.asset_type, query)"></strong>
+                                                    <strong x-text="asset.asset_type"></strong>
                                                     <span :class="getCriticalityClass(asset.criticality)" x-text="asset.criticality"></span>
                                                 </div>
-                                                <small class="text-muted" x-html="highlightMatch(`${asset.serial_number || ''} | ${asset.ip_address || ''} | ${asset.mac_address || ''}`, query)"></small>
+                                                <small class="text-muted" x-text="`${asset.serial_number || ''} | ${asset.ip_address || ''} | ${asset.mac_address || ''}`"></small>
                                                 <div class="mt-1">
                                                     <span class="badge bg-light text-dark me-1" x-text="asset.manufacturer"></span>
-                                                    <span class="badge bg-light text-dark" x-text="asset.site_name"></span>
+                                                    <span class="badge bg-light text-dark me-1" x-text="asset.site_name"></span>
+                                                    <template x-if="getMatchedField(asset)">
+                                                        <span class="badge bg-info text-dark" x-text="getMatchedField(asset)"></span>
+                                                    </template>
                                                 </div>
                                             </div>
                                         </li>
@@ -607,11 +610,6 @@ function assetSearch() {
                 window.dispatchEvent(new CustomEvent('update-asset-modal'));
             }
         },
-        highlightMatch(text, query) {
-            if (!query || text === null || text === undefined) return text;
-            const regex = new RegExp(`(${query})`, 'gi');
-            return text.toString().replace(regex, '<mark>$1</mark>');
-        },
         getAssetTypeIcon(assetType) {
             const iconMap = {
                 'PLC': 'fas fa-microchip',
@@ -629,7 +627,6 @@ function assetSearch() {
                 'Access Point': 'fas fa-wifi',
                 'IoT Device': 'fas fa-microchip',
                 'SCADA': 'fas fa-industry'
-                // Add more mappings as needed
             };
             return iconMap[assetType] || 'fas fa-cube';
         },
@@ -650,7 +647,6 @@ function assetSearch() {
                 'Access Point': 'bg-access-point',
                 'IoT Device': 'bg-iot',
                 'SCADA': 'bg-scada'
-                // Add more mappings as needed
             };
             return classMap[assetType] || 'bg-default';
         },
@@ -663,9 +659,24 @@ function assetSearch() {
             };
             return classMap[criticality] || '';
         },
+        getMatchedField(asset) {
+            const excludeFields = ['id', 'criticality'];
+            const query = this.query.toLowerCase();
+
+            for (const [key, value] of Object.entries(asset)) {
+                if (excludeFields.includes(key)) continue;
+                if (value && value.toString().toLowerCase().includes(query)) {
+                    const label = key.split(/(?=[A-Z])|_/).map(word => 
+                        word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+                    ).join(' ');
+                    return `${label}: ${value}`;
+                }
+            }
+            return null;
+        },
         formatFieldValue(key, value) {
             if (value === null || value === undefined) return '';
-            return `${key}: ${this.highlightMatch(value.toString(), this.query)}`;
+            return `${key}: ${value.toString()}`;
         }
     }
 }
