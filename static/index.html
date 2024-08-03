@@ -337,7 +337,6 @@
         </table>
     </div>
     
-    <!-- Pagination controls -->
     <nav aria-label="Search results pages">
         <ul class="pagination justify-content-center">
             <li class="page-item" :class="{ 'disabled': currentPage === 1 }">
@@ -768,50 +767,48 @@ function assetSearch() {
                 });
         },
 
-        performAdvancedSearch(page = 1) {
-    this.loading = true;
-    const payload = {
-        criteria: this.criteria.filter(c => c.field && c.operator && c.value),
-        boolean_options: this.booleanOptions,
-        custom_query: this.useCustomQuery ? this.customQuery : null,
-        page: page,
-        size: this.pageSize,
-        sort_field: this.sortField,
-        sort_order: this.sortOrder
-    };
+        performAdvancedSearch(event = null) {
+            if (event) event.preventDefault();
+            
+            this.loading = true;
+            const payload = {
+                criteria: this.criteria.filter(c => c.field && c.operator && c.value),
+                boolean_options: this.booleanOptions,
+                custom_query: this.useCustomQuery ? this.customQuery : null,
+                page: this.currentPage,
+                size: this.pageSize,
+                sort_field: this.sortField,
+                sort_order: this.sortOrder
+            };
 
-    console.log('Sending advanced search payload:', payload);
+            console.log('Sending advanced search payload:', payload);
 
-    fetch('/advanced-search', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
+            fetch('/advanced-search', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(payload),
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Received advanced search results:', data);
+                if (data.detail) {
+                    console.error('Error in advanced search:', data.detail);
+                    this.advancedResults = [];
+                } else {
+                    this.advancedResults = data.assets || [];
+                    this.totalPages = data.total_pages || 1;
+                    this.currentPage = data.page || 1;
+                }
+                this.loading = false;
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                this.advancedResults = [];
+                this.loading = false;
+            });
         },
-        body: JSON.stringify(payload),
-    })
-    .then(response => response.json())
-    .then(data => {
-        console.log('Received advanced search results:', data);
-        this.advancedResults = data.assets;
-        this.totalPages = data.total_pages;
-        this.currentPage = page;
-        this.loading = false;
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        this.loading = false;
-    });
-},
-
-changePage(newPage) {
-    if (newPage >= 1 && newPage <= this.totalPages) {
-        this.performAdvancedSearch(newPage);
-    }
-},
-
-
-
-
 
         selectAsset(asset) {
             this.showDropdown = false;
@@ -934,11 +931,6 @@ changePage(newPage) {
             this.criteria.splice(index, 1);
         },
 
-        formatFieldValue(key, value) {
-            if (value === null || value === undefined) return '';
-            return `${key}: ${value.toString()}`;
-        },
-
         resetAdvancedSearch() {
             this.criteria = [{ field: '', operator: '=', value: '' }];
             this.booleanOptions = {
@@ -953,19 +945,16 @@ changePage(newPage) {
             this.sortField = 'criticality.keyword';
             this.sortOrder = 'desc';
             this.advancedResults = [];
-        },
-
-        exportResults() {
-            // Implement export functionality (e.g., CSV, Excel)
-            console.log('Exporting results...');
-        },
-
-        printResults() {
-            // Implement print functionality
-            console.log('Printing results...');
         }
     }
 }
+
+
+
+
+
+
+
 function assetModalData() {
     return {
         asset: {},

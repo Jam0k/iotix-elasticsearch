@@ -166,16 +166,17 @@ async def advanced_search(
     criteria: List[dict] = Body(..., description="List of search criteria"),
     boolean_options: dict = Body(..., description="Boolean options"),
     custom_query: Optional[str] = Body(None, description="Custom query"),
-    page: int = Query(1, ge=1, description="Page number"),
-    size: int = Query(10, ge=1, le=100, description="Number of results per page"),
-    sort_field: str = Query("criticality.keyword", description="Field to sort by"),
-    sort_order: str = Query("desc", description="Sort order (asc or desc)")
+    page: int = Body(1, description="Page number"),
+    size: int = Body(10, description="Number of results per page"),
+    sort_field: str = Body("criticality.keyword", description="Field to sort by"),
+    sort_order: str = Body("desc", description="Sort order (asc or desc)")
 ):
     try:
         from_index = (page - 1) * size
 
         print(f"Received criteria: {criteria}")
         print(f"Received boolean_options: {boolean_options}")
+        print(f"Received page: {page}, size: {size}")
 
         must_clauses = []
 
