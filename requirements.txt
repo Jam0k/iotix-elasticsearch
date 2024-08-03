@@ -5,3 +5,4 @@ psycopg2-binary
 elasticsearch
 python-dotenv
 python-dateutil
+faker

@@ -127,3 +127,4 @@ app.include_router(search_router)
 @app.get("/")
 async def root():
     return FileResponse("static/index.html")
+

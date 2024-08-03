@@ -1,5 +1,5 @@
 from elasticsearch import Elasticsearch
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, HTTPException, Query, Body
 from typing import Optional, List
 import os
 from datetime import datetime, timedelta
@@ -159,3 +159,113 @@ async def search_assets(
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error during search: {str(e)}")
+    
+
+@router.post("/advanced-search")
+async def advanced_search(
+    criteria: List[dict] = Body(..., description="List of search criteria"),
+    boolean_options: dict = Body(..., description="Boolean options"),
+    custom_query: Optional[str] = Body(None, description="Custom query"),
+    page: int = Query(1, ge=1, description="Page number"),
+    size: int = Query(10, ge=1, le=100, description="Number of results per page"),
+    sort_field: str = Query("criticality.keyword", description="Field to sort by"),
+    sort_order: str = Query("desc", description="Sort order (asc or desc)")
+):
+    try:
+        from_index = (page - 1) * size
+
+        print(f"Received criteria: {criteria}")
+        print(f"Received boolean_options: {boolean_options}")
+
+        must_clauses = []
+
+        for criterion in criteria:
+            field = criterion['field']
+            operator = criterion['operator']
+            value = criterion['value']
+
+            if value:  # Only add non-empty criteria
+                if operator == '=':
+                    must_clauses.append({"match": {field: value}})
+                elif operator == '!=':
+                    must_clauses.append({"bool": {"must_not": {"match": {field: value}}}})
+                elif operator == 'contains':
+                    must_clauses.append({"wildcard": {field: f"*{value.lower()}*"}})
+                elif operator == 'starts_with':
+                    must_clauses.append({"prefix": {field: value.lower()}})
+                elif operator == 'ends_with':
+                    must_clauses.append({"wildcard": {field: f"*{value.lower()}"}})
+                elif operator == 'regex':
+                    must_clauses.append({"regexp": {field: f"(?i){value}"}})
+                elif operator in ['>', '<', '>=', '<=']:
+                    must_clauses.append({"range": {field: {operator: value}}})
+
+        # Add boolean options
+        for field, value in boolean_options.items():
+            if value is not None:
+                must_clauses.append({"term": {field: value}})
+
+        # Add custom query if provided
+        if custom_query:
+            must_clauses.append({"query_string": {"query": custom_query}})
+
+        # Construct the final query
+        if must_clauses:
+            body = {
+                "query": {
+                    "bool": {
+                        "must": must_clauses
+                    }
+                },
+                "from": from_index,
+                "size": size,
+                "sort": [{sort_field: {"order": sort_order}}]
+            }
+        else:
+            body = {
+                "query": {"match_all": {}},
+                "from": from_index,
+                "size": size,
+                "sort": [{sort_field: {"order": sort_order}}]
+            }
+
+        print(f"Elasticsearch query body: {body}")  # Log the query for debugging
+
+        result = es.search(index="assets", body=body)
+        
+        hits = result['hits']['hits']
+        assets = []
+        for hit in hits:
+            asset = {
+                "id": hit["_id"],
+                "score": hit["_score"],
+                "highlight": hit.get("highlight", {}),
+                "badges": [],
+                **hit["_source"]
+            }
+            
+            # Generate badges for matching fields
+            for field, highlights in hit.get("highlight", {}).items():
+                if highlights:
+                    asset["badges"].append({
+                        "field": field,
+                        "value": highlights[0].replace("<mark>", "").replace("</mark>", "")
+                    })
+            
+            assets.append(asset)
+
+        total_results = result['hits']['total']['value']
+        total_pages = (total_results + size - 1) // size
+
+        return {
+            "total": total_results,
+            "assets": assets,
+            "aggregations": result.get("aggregations", {}),
+            "page": page,
+            "size": size,
+            "total_pages": total_pages
+        }
+
+    except Exception as e:
+        print(f"Error during advanced search: {str(e)}")  # Log the error for debugging
+        raise HTTPException(status_code=500, detail=f"Error during advanced search: {str(e)}")
