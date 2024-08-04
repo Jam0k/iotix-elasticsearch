@@ -49,12 +49,72 @@
                 <div class="mb-3">
                     <div class="card">
                         <div class="card-body">
-                            <h2 class="card-title mb-4">Asset Search</h2>
+                            <h2 class="card-title mb-4">Asset Management</h2>
 
-                            <!-- Toggle button for Advanced Search -->
-                            <button class="btn btn-secondary mb-3" @click="toggleAdvancedSearch">
-                                <i class="fas fa-search-plus me-2"></i>Advanced Search
-                            </button>
+<!-- Toggle for Advanced Search and Add Asset button -->
+<div class="mb-3">
+    <button @click="toggleAdvancedSearch" class="btn btn-secondary me-2">
+        <i class="fas" :class="showAdvancedSearch ? 'fa-search' : 'fa-search-plus'"></i>
+        <span x-text="showAdvancedSearch ? 'Simple Search' : 'Advanced Search'"></span>
+    </button>
+    <button @click="openAddAssetModal" class="btn btn-primary">
+        <i class="fas fa-plus-circle"></i>
+        Add Asset
+    </button>
+</div>
+
+
+
+<!-- Add Asset Modal -->
+<div id="addAssetModal" class="modal fade" tabindex="-1" aria-labelledby="addAssetModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addAssetModalLabel">Add New Asset</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <h6>How would you like to add a new asset?</h6>
+                <div class="d-grid gap-2">
+                    <button @click="selectAddAssetMethod('manual')" class="btn btn-primary">Manual Entry</button>
+                    <button @click="selectAddAssetMethod('iotixScan')" class="btn btn-secondary">iotix Network Scan</button>
+                    <button @click="selectAddAssetMethod('activeDirectory')" class="btn btn-secondary">Active Directory</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Manual Entry Modal -->
+<div id="manualEntryModal" class="modal fade" tabindex="-1" aria-labelledby="manualEntryModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="manualEntryModalLabel">Manual Asset Entry</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form @submit.prevent="addNewAsset">
+                    <!-- Add form fields for all asset attributes -->
+                    <div class="mb-3">
+                        <label for="assetType" class="form-label">Asset Type</label>
+                        <input type="text" class="form-control" id="assetType" x-model="newAsset.assetType">
+                    </div>
+                    <div class="mb-3">
+                        <label for="manufacturer" class="form-label">Manufacturer</label>
+                        <input type="text" class="form-control" id="manufacturer" x-model="newAsset.manufacturer">
+                    </div>
+                    <!-- Add more fields for other asset attributes -->
+                    <button type="submit" class="btn btn-primary">Add Asset</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+                            
 
                             <!-- Simple search input (show when advanced search is not active) -->
                             <div x-show="!showAdvancedSearch" class="mb-4 position-relative">

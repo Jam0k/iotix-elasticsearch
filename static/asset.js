@@ -15,6 +15,8 @@ function assetSearch() {
         showAdvancedSearch: false,
         modal: null,
         gridModal: null,
+        addAssetModal: null,
+        manualEntryModal: null,
         criteria: [{ field: '', operator: '=', value: '' }],
         booleanOptions: {
             secure_location: null,
@@ -50,18 +52,63 @@ function assetSearch() {
         showFilterRow: false,
         columnSelectorModal: null,
         draggedColumn: null,
+        newAsset: {},
 
         init() {
             this.$nextTick(() => {
                 const assetModalEl = document.getElementById('assetModal');
                 const gridModalEl = document.getElementById('gridModal');
                 const columnSelectorModalEl = document.getElementById('columnSelectorModal');
+                const addAssetModalEl = document.getElementById('addAssetModal');
+                const manualEntryModalEl = document.getElementById('manualEntryModal');
 
                 if (assetModalEl) this.modal = new bootstrap.Modal(assetModalEl);
                 if (gridModalEl) this.gridModal = new bootstrap.Modal(gridModalEl);
                 if (columnSelectorModalEl) this.columnSelectorModal = new bootstrap.Modal(columnSelectorModalEl);
+                if (addAssetModalEl) this.addAssetModal = new bootstrap.Modal(addAssetModalEl);
+                if (manualEntryModalEl) this.manualEntryModal = new bootstrap.Modal(manualEntryModalEl);
             });
             this.visibleColumns = [...this.selectedAttributes];
+        },
+
+        openAddAssetModal() {
+            if (this.addAssetModal) {
+                this.addAssetModal.show();
+            }
+        },
+
+        selectAddAssetMethod(method) {
+            if (method === 'manual') {
+                this.addAssetModal.hide();
+                this.openManualEntryModal();
+            } else if (method === 'iotixScan') {
+                // Implement iotix Network Scan functionality
+                console.log('iotix Network Scan selected');
+            } else if (method === 'activeDirectory') {
+                // Implement Active Directory functionality
+                console.log('Active Directory selected');
+            }
+        },
+
+        openManualEntryModal() {
+            this.newAsset = {}; // Reset the newAsset object
+            if (this.manualEntryModal) {
+                this.manualEntryModal.show();
+            }
+        },
+
+        addNewAsset() {
+            console.log('Adding new asset:', this.newAsset);
+            // Here you would typically send this data to your backend
+            // After successfully adding, you might want to reset the form:
+            this.newAsset = {};
+            // Optionally, show a success message
+            alert('Asset added successfully!');
+            // Close the modal
+            if (this.manualEntryModal) {
+                this.manualEntryModal.hide();
+            }
+            // Optionally, refresh the asset list or perform a new search
         },
 
         search() {
