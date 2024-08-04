@@ -198,3 +198,25 @@ body {
     opacity: 0.5;
     background-color: #f8f9fa;
 }
+#gridModal .table {
+    height: 100%;
+    width: 100%;
+}
+
+#gridModal .table th,
+#gridModal .table td {
+    padding: 1rem;
+    font-size: 1.1rem;
+}
+
+#gridModal .modal-body {
+    height: calc(100vh - 120px); /* Adjust based on your header and footer height */
+    padding: 0;
+}
+
+#gridModal .table-responsive {
+    height: 100%;
+}
+#gridModal .modal-footer {
+    justify-content: center;
+}

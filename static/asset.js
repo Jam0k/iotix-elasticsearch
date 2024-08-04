@@ -144,6 +144,60 @@ function assetSearch() {
             }
         },
 
+        openAssetModalFromGrid(asset) {
+            if (asset) {
+                Alpine.store('assetSearch').selectedAsset = asset;
+                
+                // Remove existing backdrop
+                this.removeBackdrop();
+        
+                // Ensure the asset modal has a higher z-index
+                const assetModalElement = document.getElementById('assetModal');
+                if (assetModalElement) {
+                    assetModalElement.style.zIndex = '1060';
+                }
+        
+                // Show the asset modal
+                this.modal.show();
+        
+                // Dispatch the event to update the modal content
+                window.dispatchEvent(new CustomEvent('update-asset-modal'));
+        
+                // Add event listener for asset modal hidden event
+                assetModalElement.addEventListener('hidden.bs.modal', () => {
+                    // Check if grid modal is still open
+                    const gridModalElement = document.getElementById('gridModal');
+                    if (gridModalElement.classList.contains('show')) {
+                        // Re-show the grid modal backdrop
+                        document.body.classList.add('modal-open');
+                        const backdrop = document.createElement('div');
+                        backdrop.className = 'modal-backdrop fade show';
+                        document.body.appendChild(backdrop);
+                    } else {
+                        // Both modals are closed, remove backdrop
+                        this.removeBackdrop();
+                    }
+                }, { once: true });
+        
+                // Modify the grid modal to prevent closing when clicking outside
+                const gridModalElement = document.getElementById('gridModal');
+                const gridModal = bootstrap.Modal.getInstance(gridModalElement);
+                gridModal._config.backdrop = 'static';
+                gridModal._config.keyboard = false;
+            }
+        },
+        
+        // Add this new method to assetSearch()
+        removeBackdrop() {
+            const backdrop = document.querySelector('.modal-backdrop');
+            if (backdrop) {
+                backdrop.remove();
+            }
+            document.body.classList.remove('modal-open');
+        },
+
+
+
         getAssetTypeIcon(assetType) {
             const iconMap = {
                 'PLC': 'fas fa-microchip',
@@ -270,8 +324,16 @@ function assetSearch() {
 
         openGridModal() {
             this.gridModal.show();
+            
+            // Add event listener for grid modal hidden event
+            const gridModalElement = document.getElementById('gridModal');
+            gridModalElement.addEventListener('hidden.bs.modal', () => {
+                this.removeBackdrop();
+            }, { once: true });
         },
 
+
+        
         toggleColumnSelector() {
             if (!this.columnSelectorModal) {
                 const modalElement = document.getElementById('columnSelectorModal');
@@ -341,8 +403,6 @@ function assetSearch() {
         }
     }
 }
-
-
 
 
 
