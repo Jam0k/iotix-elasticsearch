@@ -7,7 +7,6 @@ from sqlalchemy import create_engine, text, inspect
 from contextlib import asynccontextmanager
 from dotenv import load_dotenv
 from app.search import router as search_router  # Updated import statement
-from app.models import Asset
 
 load_dotenv()
 
