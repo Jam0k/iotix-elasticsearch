@@ -7,6 +7,7 @@ from sqlalchemy import create_engine, text, inspect
 from contextlib import asynccontextmanager
 from dotenv import load_dotenv
 from app.search import router as search_router  # Updated import statement
+from app.models import Asset
 
 load_dotenv()
 
@@ -66,15 +67,8 @@ def create_tables(engine):
             responsible_department VARCHAR(100),
             primary_contact_person VARCHAR(100),
             backup_contact_person VARCHAR(100),
-            compliance_requirements TEXT,
-            custom_configurations TEXT,
-            connected_devices TEXT,
-            failure_history TEXT,
-            created_date DATE,
-            modified_date DATE
-        );
+            compliance_requirements TEXT,from app.database import get_db
 
-        CREATE TABLE IF NOT EXISTS asset_history (
             id SERIAL PRIMARY KEY,
             asset_id INTEGER REFERENCES assets(id),
             change_type VARCHAR(50),
@@ -127,4 +121,3 @@ app.include_router(search_router)
 @app.get("/")
 async def root():
     return FileResponse("static/index.html")
-
