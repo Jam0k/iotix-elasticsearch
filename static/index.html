@@ -9,8 +9,12 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="static/styles.css">
-    <script src="static/asset.js"></script>
+    <script src="static/assetSearch.js"></script>
+    <script src="static/assetModalData.js"></script>
+<script src="/static/chartData.js"></script>
+
 
 </head>
 
@@ -354,6 +358,10 @@
 
 
 
+                            
+
+
+
 
                             <div class="mt-4" x-show="showAdvancedSearch && advancedResults.length > 0">
                                 <div class="d-flex justify-content-between align-items-center mb-3">
@@ -443,10 +451,29 @@
                             </div>
                         </div>
                     </div>
-                </div>
-            </div>
+                    <div class="row mt-4">
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-body">
+                                    <canvas id="assetTypesChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-body">
+                                    <canvas id="assetCriticalityChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
 
+
+
+
+
+            
 
             <!-- Modal -->
             <div id="assetModal" class="modal fade" tabindex="-1" aria-labelledby="assetModalLabel" aria-hidden="true" data-bs-backdrop="static" x-data="assetModalData()">

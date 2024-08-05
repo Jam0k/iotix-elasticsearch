@@ -172,8 +172,6 @@ async def advanced_search(
     sort_order: str = Body("desc", description="Sort order (asc or desc)")
 ):
     try:
-        from_index = (page - 1) * size
-
         print(f"Received criteria: {criteria}")
         print(f"Received boolean_options: {boolean_options}")
         print(f"Received page: {page}, size: {size}")
@@ -211,24 +209,16 @@ async def advanced_search(
             must_clauses.append({"query_string": {"query": custom_query}})
 
         # Construct the final query
-        if must_clauses:
-            body = {
-                "query": {
-                    "bool": {
-                        "must": must_clauses
-                    }
-                },
-                "from": from_index,
-                "size": size,
-                "sort": [{sort_field: {"order": sort_order}}]
+        body = {
+            "size": size,
+            "from": (page - 1) * size if size > 0 else 0,
+            "sort": [{sort_field: {"order": sort_order}}],
+            "query": {"bool": {"must": must_clauses}} if must_clauses else {"match_all": {}},
+            "aggs": {
+                "asset_types": {"terms": {"field": "asset_type.keyword"}},
+                "criticality": {"terms": {"field": "criticality.keyword"}}
             }
-        else:
-            body = {
-                "query": {"match_all": {}},
-                "from": from_index,
-                "size": size,
-                "sort": [{sort_field: {"order": sort_order}}]
-            }
+        }
 
         print(f"Elasticsearch query body: {body}")  # Log the query for debugging
 
@@ -256,7 +246,7 @@ async def advanced_search(
             assets.append(asset)
 
         total_results = result['hits']['total']['value']
-        total_pages = (total_results + size - 1) // size
+        total_pages = (total_results + size - 1) // size if size > 0 else 1
 
         return {
             "total": total_results,
