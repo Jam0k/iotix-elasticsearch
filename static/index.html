@@ -25,7 +25,7 @@
     <nav class="navbar navbar-expand-lg navbar-dark">
         <div class="container">
             <a class="navbar-brand" href="#">
-                <i class="fas fa-network-wired me-2"></i>IoTix Asset Management
+                <i class="fas fa-network-wired me-2"></i>IoTix
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
                 aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
@@ -43,29 +43,46 @@
                         <a class="nav-link" href="#">Reports</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#">Settings</a>
+                        <a class="nav-link" href="#">SettCan you make them all aligned, ings</a>
                     </li>
                 </ul>
             </div>
         </div>
     </nav>
 
-    <div class="container mt-4 main-content" x-data="assetSearch">
-        <div class="row">
-          <div class="col-lg-12">
-            <div class="card mb-4">
-              <div class="card-body">
-                <h2 class="card-title mb-4">Asset Management</h2>
-                
-                <div class="d-flex justify-content-between mb-3">
-                  <button class="btn btn-outline-primary" @click="toggleAdvancedSearch">
-                    <span x-text="showAdvancedSearch ? 'Simple Search' : 'Advanced Search'"></span>
-                  </button>
-                  <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addAssetModal">
-                    Add Asset
-                  </button>
-                </div>
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
+
+<!-- Asset Management Section -->
+<div class="container mt-4 main-content" x-data="assetSearch">
+    <div class="row">
+      <div class="col-lg-12">
+        <div class="card mb-4">
+          <div class="card-body">
+            <h2 class="card-title mb-4"></i>Asset Search</h2>
+            
+            <div class="d-flex justify-content-between mb-3">
+              <button class="btn btn-outline-primary" @click="toggleAdvancedSearch">
+                <i class="fas fa-search-plus me-2"></i>
+                <span x-text="showAdvancedSearch ? 'Simple Search' : 'Advanced Search'"></span>
+              </button>
+              <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addAssetModal">
+                <i class="fas fa-plus-circle me-2"></i>Add Asset
+              </button>
+            </div>
 
 
                             <!-- Add Asset Modal -->
@@ -371,22 +388,22 @@
 
 
 
-                            <div class="mt-4" x-show="showAdvancedSearch && advancedResults.length > 0">
-                                <div class="d-flex justify-content-between align-items-center mb-3">
-                                    <h5><i class="fas fa-list me-2"></i>Search Results</h5>
-                                    <div>
-                                        <button class="btn btn-outline-primary btn-sm"
-                                            @click.prevent="toggleColumnSelector">
-                                            <i class="fas fa-columns me-2"></i>Select Columns
-                                        </button>
-                                        <button class="btn btn-outline-primary btn-sm ms-2" @click="toggleFilterRow">
-                                            <i class="fas fa-filter me-2"></i>Toggle Filters
-                                        </button>
-                                        <button class="btn btn-outline-primary btn-sm ms-2" @click="openGridModal">
-                                            <i class="fas fa-expand me-2"></i>Full Screen
-                                        </button>
-                                    </div>
-                                </div>
+          <!-- Search Results -->
+          <div class="mt-4" x-show="showAdvancedSearch && advancedResults.length > 0">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <h5><i class="fas fa-list me-2"></i>Search Results</h5>
+              <div>
+                <button class="btn btn-outline-secondary btn-sm me-2">
+                  <i class="fas fa-columns me-1"></i>Select Columns
+                </button>
+                <button class="btn btn-outline-secondary btn-sm me-2">
+                  <i class="fas fa-toggle-on me-1"></i>Toggle Filters
+                </button>
+                <button class="btn btn-outline-secondary btn-sm">
+                  <i class="fas fa-expand me-1"></i>Full Screen
+                </button>
+              </div>
+            </div>
                                 <div class="card">
                                     <div class="card-body p-0">
                                         <div class="table-responsive" style="height: 400px;">
@@ -461,70 +478,69 @@
                     </div>
                     <!-- Charts -->
 </div>
-     <div class="container-fluid mt-4">
-                <div class="row">
-                    <!-- Left-hand Menu -->
-                    <div class="col-md-3">
-                        <div class="card">
-                            <div class="card-body">
-                                <h5 class="card-title">Asset Information</h5>
-                                <div class="nav flex-column nav-pills" id="v-pills-tab" role="tablist"
-                                    aria-orientation="vertical">
-                                    <button class="nav-link active" id="v-pills-identification-tab"
-                                        data-bs-toggle="pill" data-bs-target="#v-pills-identification" type="button"
-                                        role="tab">Asset Identification</button>
-                                    <button class="nav-link" id="v-pills-location-tab" data-bs-toggle="pill"
-                                        data-bs-target="#v-pills-location" type="button" role="tab">Location
-                                        Information</button>
-                                    <button class="nav-link" id="v-pills-technical-tab" data-bs-toggle="pill"
-                                        data-bs-target="#v-pills-technical" type="button" role="tab">Technical
-                                        Specifications</button>
-                                    <button class="nav-link" id="v-pills-network-tab" data-bs-toggle="pill"
-                                        data-bs-target="#v-pills-network" type="button" role="tab">Network and
-                                        Security</button>
-                                    <button class="nav-link" id="v-pills-maintenance-tab" data-bs-toggle="pill"
-                                        data-bs-target="#v-pills-maintenance" type="button" role="tab">Maintenance and
-                                        Support</button>
-                                    <button class="nav-link" id="v-pills-financial-tab" data-bs-toggle="pill"
-                                        data-bs-target="#v-pills-financial" type="button" role="tab">Financial
-                                        Information</button>
-                                    <button class="nav-link" id="v-pills-status-tab" data-bs-toggle="pill"
-                                        data-bs-target="#v-pills-status" type="button" role="tab">Status and
-                                        Criticality</button>
-                                    <button class="nav-link" id="v-pills-responsibility-tab" data-bs-toggle="pill"
-                                        data-bs-target="#v-pills-responsibility" type="button" role="tab">Responsibility
-                                        and Compliance</button>
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title mb-3">Asset Information</h5>
+                    
+                    <!-- Tab Navigation -->
+                    <ul class="nav nav-tabs mb-3" id="assetInfoTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="v-pills-identification-tab" data-bs-toggle="tab" data-bs-target="#v-pills-identification" type="button" role="tab">Identification</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="v-pills-location-tab" data-bs-toggle="tab" data-bs-target="#v-pills-location" type="button" role="tab">Location</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="v-pills-technical-tab" data-bs-toggle="tab" data-bs-target="#v-pills-technical" type="button" role="tab">Technical</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="v-pills-network-tab" data-bs-toggle="tab" data-bs-target="#v-pills-network" type="button" role="tab">Network</button>
+                        </li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button" aria-expanded="false">More</a>
+                            <ul class="dropdown-menu">
+                                <li><button class="dropdown-item" id="v-pills-maintenance-tab" data-bs-toggle="tab" data-bs-target="#v-pills-maintenance" type="button" role="tab">Maintenance</button></li>
+                                <li><button class="dropdown-item" id="v-pills-financial-tab" data-bs-toggle="tab" data-bs-target="#v-pills-financial" type="button" role="tab">Financial</button></li>
+                                <li><button class="dropdown-item" id="v-pills-status-tab" data-bs-toggle="tab" data-bs-target="#v-pills-status" type="button" role="tab">Status</button></li>
+                                <li><button class="dropdown-item" id="v-pills-responsibility-tab" data-bs-toggle="tab" data-bs-target="#v-pills-responsibility" type="button" role="tab">Responsibility</button></li>
+                            </ul>
+                        </li>
+                    </ul>
 
-                                </div>
-                            </div>
+                    <!-- Tab Content -->
+                    <div class="tab-content" id="v-pills-tabContent">
+                        <!-- Chart container (outside of individual tab panes to be always visible) -->
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <button class="btn btn-outline-primary" id="prevChart"><i class="fas fa-chevron-left"></i></button>
+                            <h5 class="card-title" id="chartTitle">Asset Type Distribution</h5>
+                            <button class="btn btn-outline-primary" id="nextChart"><i class="fas fa-chevron-right"></i></button>
                         </div>
-                    </div>
+                        <div class="chart-container">
+                            <canvas id="chartCanvas"></canvas>
+                        </div>
 
-                    <!-- Chart Display Area -->
-                    <div class="col-md-9">
-                        <div class="card">
-                            <div class="card-body">
-                                <div class="d-flex justify-content-between align-items-center mb-3">
-                                    <button class="btn btn-outline-primary" id="prevChart"><i
-                                            class="fas fa-chevron-left"></i></button>
-                                    <h5 class="card-title" id="chartTitle">Asset Type Distribution</h5>
-                                    <button class="btn btn-outline-primary" id="nextChart"><i
-                                            class="fas fa-chevron-right"></i></button>
-                                </div>
-                                <div class="chart-container">
-                                    <canvas id="chartCanvas"></canvas>
-                                </div>
-                            </div>
-                        </div>
+                        <!-- Individual tab panes -->
+                        <div class="tab-pane fade show active" id="v-pills-identification" role="tabpanel" aria-labelledby="v-pills-identification-tab"></div>
+                        <div class="tab-pane fade" id="v-pills-location" role="tabpanel" aria-labelledby="v-pills-location-tab"></div>
+                        <div class="tab-pane fade" id="v-pills-technical" role="tabpanel" aria-labelledby="v-pills-technical-tab"></div>
+                        <div class="tab-pane fade" id="v-pills-network" role="tabpanel" aria-labelledby="v-pills-network-tab"></div>
+                        <div class="tab-pane fade" id="v-pills-maintenance" role="tabpanel" aria-labelledby="v-pills-maintenance-tab"></div>
+                        <div class="tab-pane fade" id="v-pills-financial" role="tabpanel" aria-labelledby="v-pills-financial-tab"></div>
+                        <div class="tab-pane fade" id="v-pills-status" role="tabpanel" aria-labelledby="v-pills-status-tab"></div>
+                        <div class="tab-pane fade" id="v-pills-responsibility" role="tabpanel" aria-labelledby="v-pills-responsibility-tab"></div>
                     </div>
                 </div>
             </div>
-
+        </div>
+    </div>
+</div>
 
             <!-- Modal -->
             <div id="assetModal" class="modal fade" tabindex="-1" aria-labelledby="assetModalLabel" aria-hidden="true"
                 data-bs-backdrop="static" x-data="assetModalData()">
-                x-data="assetModalData()">
                 <div class="modal-dialog modal-xl">
                     <div class="modal-content">
                         <div class="modal-header bg-primary text-white">
@@ -1045,6 +1061,109 @@
                                     </li>
                                 </ul>
                             </nav>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="container-fluid mt-4">
+                <div class="row">
+                    <!-- IoTix Network Scan -->
+                    <div class="col-md-4 mb-4">
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <h5 class="card-title"><i class="fas fa-network-wired me-2"></i>IoTix Network Scan</h5>
+                                <p class="card-text">Perform passive network scans to discover and monitor OT assets without disrupting operations.</p>
+                                <a href="#" class="btn btn-primary">Start Scan</a>
+                            </div>
+                        </div>
+                    </div>
+            
+                    <!-- Vulnerability Management Overview -->
+                    <div class="col-md-4 mb-4">
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <h5 class="card-title"><i class="fas fa-shield-alt me-2"></i>Vulnerability Management</h5>
+                                <p class="card-text">View and manage OT-specific vulnerabilities across your industrial network.</p>
+                                <a href="#" class="btn btn-primary">View Vulnerabilities</a>
+                            </div>
+                        </div>
+                    </div>
+            
+                    <!-- Asset Inventory -->
+                    <div class="col-md-4 mb-4">
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <h5 class="card-title"><i class="fas fa-clipboard-list me-2"></i>Asset Inventory</h5>
+                                <p class="card-text">Access your comprehensive OT asset inventory with automatic discovery and classification.</p>
+                                <a href="#" class="btn btn-primary">View Inventory</a>
+                            </div>
+                        </div>
+                    </div>
+            
+                    <!-- Network Topology -->
+                    <div class="col-md-4 mb-4">
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <h5 class="card-title"><i class="fas fa-project-diagram me-2"></i>Network Topology</h5>
+                                <p class="card-text">Visualize your OT network topology with interactive diagrams and real-time updates.</p>
+                                <a href="#" class="btn btn-primary">View Topology</a>
+                            </div>
+                        </div>
+                    </div>
+            
+                    <!-- Compliance Dashboard -->
+                    <div class="col-md-4 mb-4">
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <h5 class="card-title"><i class="fas fa-check-double me-2"></i>Compliance Dashboard</h5>
+                                <p class="card-text">Monitor your compliance status with relevant OT security standards and regulations.</p>
+                                <a href="#" class="btn btn-primary">Check Compliance</a>
+                            </div>
+                        </div>
+                    </div>
+            
+                    <!-- Anomaly Detection -->
+                    <div class="col-md-4 mb-4">
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <h5 class="card-title"><i class="fas fa-exclamation-triangle me-2"></i>Anomaly Detection</h5>
+                                <p class="card-text">View alerts and insights from our AI-powered anomaly detection system for OT networks.</p>
+                                <a href="#" class="btn btn-primary">View Alerts</a>
+                            </div>
+                        </div>
+                    </div>
+            
+                    <!-- Patch Management -->
+                    <div class="col-md-4 mb-4">
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <h5 class="card-title"><i class="fas fa-wrench me-2"></i>Patch Management</h5>
+                                <p class="card-text">Manage and schedule patches for your OT devices with consideration for operational constraints.</p>
+                                <a href="#" class="btn btn-primary">Manage Patches</a>
+                            </div>
+                        </div>
+                    </div>
+            
+                    <!-- Traffic Analysis -->
+                    <div class="col-md-4 mb-4">
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <h5 class="card-title"><i class="fas fa-chart-line me-2"></i>Traffic Analysis</h5>
+                                <p class="card-text">Analyze network traffic patterns and protocol usage across your OT infrastructure.</p>
+                                <a href="#" class="btn btn-primary">View Analysis</a>
+                            </div>
+                        </div>
+                    </div>
+            
+                    <!-- Security Reports -->
+                    <div class="col-md-4 mb-4">
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <h5 class="card-title"><i class="fas fa-file-alt me-2"></i>Security Reports</h5>
+                                <p class="card-text">Generate customizable security reports for various stakeholders and compliance needs.</p>
+                                <a href="#" class="btn btn-primary">Generate Report</a>
+                            </div>
                         </div>
                     </div>
                 </div>

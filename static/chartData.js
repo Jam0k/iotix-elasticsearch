@@ -47,9 +47,10 @@ function setupEventListeners() {
     document.getElementById('prevChart').addEventListener('click', () => navigateChart(-1));
     document.getElementById('nextChart').addEventListener('click', () => navigateChart(1));
 
-    document.querySelectorAll('.nav-link').forEach(tab => {
+    document.querySelectorAll('#assetInfoTabs .nav-link, #assetInfoTabs .dropdown-item').forEach(tab => {
         tab.addEventListener('click', (event) => {
-            currentCategory = event.target.id.split('-')[2];
+            let categoryId = event.target.id;
+            currentCategory = categoryId.split('-')[2];
             currentChartIndex = 0;
             renderCurrentChart();
         });
@@ -110,7 +111,6 @@ function navigateChart(direction) {
 
 function renderCurrentChart() {
     if (!charts[currentCategory] || charts[currentCategory].length === 0) {
-        console.error(`No charts defined for category: ${currentCategory}`);
         return;
     }
 
