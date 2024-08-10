@@ -12,12 +12,13 @@
     <link rel="stylesheet" href="static/styles.css">
     <script src="static/assetSearch.js"></script>
     <script src="static/assetModalData.js"></script>
-    <script src="/static/chartData.js"></script>
+    <script type="module" src="static/chartData.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-chart-treemap@2.3.0"></script>
     <script
         src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/chartjs-chart-matrix@1.1.1/dist/chartjs-chart-matrix.min.js"></script>
+        
 </head>
 
 <body>
@@ -51,23 +52,19 @@
 
     <div class="container mt-4 main-content" x-data="assetSearch">
         <div class="row">
-            <div class="col-lg-12">
-                <div class="mb-3">
-                    <div class="card">
-                        <div class="card-body">
-                            <h2 class="card-title mb-4">Asset Management</h2>
-
-                            <!-- Toggle for Advanced Search and Add Asset button -->
-                            <div class="mb-3">
-                                <button @click="toggleAdvancedSearch" class="btn btn-secondary me-2">
-                                    <i class="fas" :class="showAdvancedSearch ? 'fa-search' : 'fa-search-plus'"></i>
-                                    <span x-text="showAdvancedSearch ? 'Simple Search' : 'Advanced Search'"></span>
-                                </button>
-                                <button @click="openAddAssetModal" class="btn btn-primary">
-                                    <i class="fas fa-plus-circle"></i>
-                                    Add Asset
-                                </button>
-                            </div>
+          <div class="col-lg-12">
+            <div class="card mb-4">
+              <div class="card-body">
+                <h2 class="card-title mb-4">Asset Management</h2>
+                
+                <div class="d-flex justify-content-between mb-3">
+                  <button class="btn btn-outline-primary" @click="toggleAdvancedSearch">
+                    <span x-text="showAdvancedSearch ? 'Simple Search' : 'Advanced Search'"></span>
+                  </button>
+                  <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addAssetModal">
+                    Add Asset
+                  </button>
+                </div>
 
 
 
@@ -464,8 +461,7 @@
                     </div>
                     <!-- Charts -->
 </div>
-</div>
-            <div class="container-fluid mt-4">
+     <div class="container-fluid mt-4">
                 <div class="row">
                     <!-- Left-hand Menu -->
                     <div class="col-md-3">
@@ -498,9 +494,7 @@
                                     <button class="nav-link" id="v-pills-responsibility-tab" data-bs-toggle="pill"
                                         data-bs-target="#v-pills-responsibility" type="button" role="tab">Responsibility
                                         and Compliance</button>
-                                    <button class="nav-link" id="v-pills-additional-tab" data-bs-toggle="pill"
-                                        data-bs-target="#v-pills-additional" type="button" role="tab">Additional
-                                        Information</button>
+
                                 </div>
                             </div>
                         </div>

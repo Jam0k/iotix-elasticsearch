@@ -238,7 +238,7 @@ body {
 
 .chart-container {
     position: relative;
-    height: 60vh;
+    /* height: 60vh; */
     width: 100%;
 }
 
@@ -258,6 +258,5 @@ body {
 }
 
 .card {
-    height: calc(100vh - 100px);
     overflow-y: auto;
 }
