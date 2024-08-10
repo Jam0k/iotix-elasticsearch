@@ -9,13 +9,15 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="static/styles.css">
     <script src="static/assetSearch.js"></script>
     <script src="static/assetModalData.js"></script>
-<script src="/static/chartData.js"></script>
-
-
+    <script src="/static/chartData.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-chart-treemap@2.3.0"></script>
+    <script
+        src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/chartjs-chart-matrix@1.1.1/dist/chartjs-chart-matrix.min.js"></script>
 </head>
 
 <body>
@@ -55,70 +57,79 @@
                         <div class="card-body">
                             <h2 class="card-title mb-4">Asset Management</h2>
 
-<!-- Toggle for Advanced Search and Add Asset button -->
-<div class="mb-3">
-    <button @click="toggleAdvancedSearch" class="btn btn-secondary me-2">
-        <i class="fas" :class="showAdvancedSearch ? 'fa-search' : 'fa-search-plus'"></i>
-        <span x-text="showAdvancedSearch ? 'Simple Search' : 'Advanced Search'"></span>
-    </button>
-    <button @click="openAddAssetModal" class="btn btn-primary">
-        <i class="fas fa-plus-circle"></i>
-        Add Asset
-    </button>
-</div>
+                            <!-- Toggle for Advanced Search and Add Asset button -->
+                            <div class="mb-3">
+                                <button @click="toggleAdvancedSearch" class="btn btn-secondary me-2">
+                                    <i class="fas" :class="showAdvancedSearch ? 'fa-search' : 'fa-search-plus'"></i>
+                                    <span x-text="showAdvancedSearch ? 'Simple Search' : 'Advanced Search'"></span>
+                                </button>
+                                <button @click="openAddAssetModal" class="btn btn-primary">
+                                    <i class="fas fa-plus-circle"></i>
+                                    Add Asset
+                                </button>
+                            </div>
 
 
 
-<!-- Add Asset Modal -->
-<div id="addAssetModal" class="modal fade" tabindex="-1" aria-labelledby="addAssetModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="addAssetModalLabel">Add New Asset</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <h6>How would you like to add a new asset?</h6>
-                <div class="d-grid gap-2">
-                    <button @click="selectAddAssetMethod('manual')" class="btn btn-primary">Manual Entry</button>
-                    <button @click="selectAddAssetMethod('iotixScan')" class="btn btn-secondary">iotix Network Scan</button>
-                    <button @click="selectAddAssetMethod('activeDirectory')" class="btn btn-secondary">Active Directory</button>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
+                            <!-- Add Asset Modal -->
+                            <div id="addAssetModal" class="modal fade" tabindex="-1"
+                                aria-labelledby="addAssetModalLabel" aria-hidden="true">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="addAssetModalLabel">Add New Asset</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <h6>How would you like to add a new asset?</h6>
+                                            <div class="d-grid gap-2">
+                                                <button @click="selectAddAssetMethod('manual')"
+                                                    class="btn btn-primary">Manual Entry</button>
+                                                <button @click="selectAddAssetMethod('iotixScan')"
+                                                    class="btn btn-secondary">iotix Network Scan</button>
+                                                <button @click="selectAddAssetMethod('activeDirectory')"
+                                                    class="btn btn-secondary">Active Directory</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
 
-<!-- Manual Entry Modal -->
-<div id="manualEntryModal" class="modal fade" tabindex="-1" aria-labelledby="manualEntryModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="manualEntryModalLabel">Manual Asset Entry</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <form @submit.prevent="addNewAsset">
-                    <!-- Add form fields for all asset attributes -->
-                    <div class="mb-3">
-                        <label for="assetType" class="form-label">Asset Type</label>
-                        <input type="text" class="form-control" id="assetType" x-model="newAsset.assetType">
-                    </div>
-                    <div class="mb-3">
-                        <label for="manufacturer" class="form-label">Manufacturer</label>
-                        <input type="text" class="form-control" id="manufacturer" x-model="newAsset.manufacturer">
-                    </div>
-                    <!-- Add more fields for other asset attributes -->
-                    <button type="submit" class="btn btn-primary">Add Asset</button>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
+                            <!-- Manual Entry Modal -->
+                            <div id="manualEntryModal" class="modal fade" tabindex="-1"
+                                aria-labelledby="manualEntryModalLabel" aria-hidden="true">
+                                <div class="modal-dialog modal-lg">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="manualEntryModalLabel">Manual Asset Entry</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <form @submit.prevent="addNewAsset">
+                                                <!-- Add form fields for all asset attributes -->
+                                                <div class="mb-3">
+                                                    <label for="assetType" class="form-label">Asset Type</label>
+                                                    <input type="text" class="form-control" id="assetType"
+                                                        x-model="newAsset.assetType">
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label for="manufacturer" class="form-label">Manufacturer</label>
+                                                    <input type="text" class="form-control" id="manufacturer"
+                                                        x-model="newAsset.manufacturer">
+                                                </div>
+                                                <!-- Add more fields for other asset attributes -->
+                                                <button type="submit" class="btn btn-primary">Add Asset</button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
 
 
 
-                            
+
 
                             <!-- Simple search input (show when advanced search is not active) -->
                             <div x-show="!showAdvancedSearch" class="mb-4 position-relative">
@@ -358,7 +369,7 @@
 
 
 
-                            
+
 
 
 
@@ -451,32 +462,74 @@
                             </div>
                         </div>
                     </div>
-                    <div class="row mt-4">
-                        <div class="col-md-6">
-                            <div class="card">
-                                <div class="card-body">
-                                    <canvas id="assetTypesChart"></canvas>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="card">
-                                <div class="card-body">
-                                    <canvas id="assetCriticalityChart"></canvas>
+                    <!-- Charts -->
+</div>
+</div>
+            <div class="container-fluid mt-4">
+                <div class="row">
+                    <!-- Left-hand Menu -->
+                    <div class="col-md-3">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">Asset Information</h5>
+                                <div class="nav flex-column nav-pills" id="v-pills-tab" role="tablist"
+                                    aria-orientation="vertical">
+                                    <button class="nav-link active" id="v-pills-identification-tab"
+                                        data-bs-toggle="pill" data-bs-target="#v-pills-identification" type="button"
+                                        role="tab">Asset Identification</button>
+                                    <button class="nav-link" id="v-pills-location-tab" data-bs-toggle="pill"
+                                        data-bs-target="#v-pills-location" type="button" role="tab">Location
+                                        Information</button>
+                                    <button class="nav-link" id="v-pills-technical-tab" data-bs-toggle="pill"
+                                        data-bs-target="#v-pills-technical" type="button" role="tab">Technical
+                                        Specifications</button>
+                                    <button class="nav-link" id="v-pills-network-tab" data-bs-toggle="pill"
+                                        data-bs-target="#v-pills-network" type="button" role="tab">Network and
+                                        Security</button>
+                                    <button class="nav-link" id="v-pills-maintenance-tab" data-bs-toggle="pill"
+                                        data-bs-target="#v-pills-maintenance" type="button" role="tab">Maintenance and
+                                        Support</button>
+                                    <button class="nav-link" id="v-pills-financial-tab" data-bs-toggle="pill"
+                                        data-bs-target="#v-pills-financial" type="button" role="tab">Financial
+                                        Information</button>
+                                    <button class="nav-link" id="v-pills-status-tab" data-bs-toggle="pill"
+                                        data-bs-target="#v-pills-status" type="button" role="tab">Status and
+                                        Criticality</button>
+                                    <button class="nav-link" id="v-pills-responsibility-tab" data-bs-toggle="pill"
+                                        data-bs-target="#v-pills-responsibility" type="button" role="tab">Responsibility
+                                        and Compliance</button>
+                                    <button class="nav-link" id="v-pills-additional-tab" data-bs-toggle="pill"
+                                        data-bs-target="#v-pills-additional" type="button" role="tab">Additional
+                                        Information</button>
                                 </div>
                             </div>
                         </div>
                     </div>
 
+                    <!-- Chart Display Area -->
+                    <div class="col-md-9">
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <button class="btn btn-outline-primary" id="prevChart"><i
+                                            class="fas fa-chevron-left"></i></button>
+                                    <h5 class="card-title" id="chartTitle">Asset Type Distribution</h5>
+                                    <button class="btn btn-outline-primary" id="nextChart"><i
+                                            class="fas fa-chevron-right"></i></button>
+                                </div>
+                                <div class="chart-container">
+                                    <canvas id="chartCanvas"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-
-
-
-
-            
 
             <!-- Modal -->
-            <div id="assetModal" class="modal fade" tabindex="-1" aria-labelledby="assetModalLabel" aria-hidden="true" data-bs-backdrop="static" x-data="assetModalData()">
+            <div id="assetModal" class="modal fade" tabindex="-1" aria-labelledby="assetModalLabel" aria-hidden="true"
+                data-bs-backdrop="static" x-data="assetModalData()">
                 x-data="assetModalData()">
                 <div class="modal-dialog modal-xl">
                     <div class="modal-content">
@@ -501,7 +554,8 @@
                                             data-bs-target="#v-pills-technical" type="button" role="tab">Technical
                                             Specifications</button>
                                         <button class="nav-link" id="v-pills-network-tab" data-bs-toggle="pill"
-                                            data-bs-target="#v-pills-network" type="button" role="tab">Network and
+                                            data-bs-target="#v-pills-network" type="button" role="tab">Network
+                                            and
                                             Security</button>
                                         <button class="nav-link" id="v-pills-maintenance-tab" data-bs-toggle="pill"
                                             data-bs-target="#v-pills-maintenance" type="button" role="tab">Maintenance
@@ -529,12 +583,14 @@
                                             role="tabpanel">
                                             <h6 class="mb-3">Asset Identification</h6>
                                             <div class="mb-3">
-                                                <label for="asset_type" class="form-label">Asset or Component</label>
+                                                <label for="asset_type" class="form-label">Asset or
+                                                    Component</label>
                                                 <input type="text" class="form-control" id="asset_type"
                                                     x-model="asset.asset_type">
                                             </div>
                                             <div class="mb-3">
-                                                <label for="serial_number" class="form-label">Serial Number</label>
+                                                <label for="serial_number" class="form-label">Serial
+                                                    Number</label>
                                                 <input type="text" class="form-control" id="serial_number"
                                                     x-model="asset.serial_number">
                                             </div>
@@ -544,7 +600,8 @@
                                                     x-model="asset.part_no">
                                             </div>
                                             <div class="mb-3">
-                                                <label for="product_range" class="form-label">Product Range</label>
+                                                <label for="product_range" class="form-label">Product
+                                                    Range</label>
                                                 <input type="text" class="form-control" id="product_range"
                                                     x-model="asset.product_range">
                                             </div>
@@ -597,12 +654,14 @@
                                                     x-model="asset.mcc_no">
                                             </div>
                                             <div class="mb-3">
-                                                <label for="mcc_location" class="form-label">MCC Location</label>
+                                                <label for="mcc_location" class="form-label">MCC
+                                                    Location</label>
                                                 <input type="text" class="form-control" id="mcc_location"
                                                     x-model="asset.mcc_location">
                                             </div>
                                             <div class="mb-3">
-                                                <label for="process_area" class="form-label">Process Area</label>
+                                                <label for="process_area" class="form-label">Process
+                                                    Area</label>
                                                 <input type="text" class="form-control" id="process_area"
                                                     x-model="asset.process_area">
                                             </div>
@@ -615,7 +674,8 @@
                                                     x-model="asset.physical_location_coordinates">
                                             </div>
                                             <div class="mb-3">
-                                                <label for="secure_location" class="form-label">Secure Location</label>
+                                                <label for="secure_location" class="form-label">Secure
+                                                    Location</label>
                                                 <select class="form-select" id="secure_location"
                                                     x-model="asset.secure_location">
                                                     <option value="">Select</option>
@@ -650,7 +710,8 @@
                                                     x-model="asset.os_version">
                                             </div>
                                             <div class="mb-3">
-                                                <label for="power_supply" class="form-label">Power Supply</label>
+                                                <label for="power_supply" class="form-label">Power
+                                                    Supply</label>
                                                 <input type="text" class="form-control" id="power_supply"
                                                     x-model="asset.power_supply">
                                             </div>
@@ -679,7 +740,8 @@
                                         <div class="tab-pane fade" id="v-pills-network" role="tabpanel">
                                             <h6 class="mb-3">Network and Security</h6>
                                             <div class="mb-3">
-                                                <label for="remote_access" class="form-label">Remote Access</label>
+                                                <label for="remote_access" class="form-label">Remote
+                                                    Access</label>
                                                 <select class="form-select" id="remote_access"
                                                     x-model="asset.remote_access">
                                                     <option value="">Select</option>
@@ -696,7 +758,8 @@
                                                 </select>
                                             </div>
                                             <div class="mb-3">
-                                                <label for="network_zone" class="form-label">Network Zone</label>
+                                                <label for="network_zone" class="form-label">Network
+                                                    Zone</label>
                                                 <input type="text" class="form-control" id="network_zone"
                                                     x-model="asset.network_zone">
                                             </div>
@@ -716,7 +779,8 @@
                                                     x-model="asset.last_vulnerability_scan_date">
                                             </div>
                                             <div class="mb-3">
-                                                <label for="risk_assessment_score" class="form-label">Risk Assessment
+                                                <label for="risk_assessment_score" class="form-label">Risk
+                                                    Assessment
                                                     Score</label>
                                                 <input type="number" class="form-control" id="risk_assessment_score"
                                                     x-model="asset.risk_assessment_score">
@@ -743,7 +807,8 @@
                                                     x-model="asset.installation_date">
                                             </div>
                                             <div class="mb-3">
-                                                <label for="last_maintenance_date" class="form-label">Last Maintenance
+                                                <label for="last_maintenance_date" class="form-label">Last
+                                                    Maintenance
                                                     Date</label>
                                                 <input type="date" class="form-control" id="last_maintenance_date"
                                                     x-model="asset.last_maintenance_date">
@@ -769,7 +834,8 @@
                                                     x-model="asset.change_management"></textarea>
                                             </div>
                                             <div class="mb-3">
-                                                <label for="vendor_support_contract" class="form-label">Vendor Support
+                                                <label for="vendor_support_contract" class="form-label">Vendor
+                                                    Support
                                                     Contract</label>
                                                 <input type="text" class="form-control" id="vendor_support_contract"
                                                     x-model="asset.vendor_support_contract">
@@ -798,7 +864,8 @@
                                         <div class="tab-pane fade" id="v-pills-financial" role="tabpanel">
                                             <h6 class="mb-3">Financial Information</h6>
                                             <div class="mb-3">
-                                                <label for="purchase_cost" class="form-label">Purchase Cost</label>
+                                                <label for="purchase_cost" class="form-label">Purchase
+                                                    Cost</label>
                                                 <input type="number" step="0.01" class="form-control" id="purchase_cost"
                                                     x-model="asset.purchase_cost">
                                             </div>
@@ -809,7 +876,8 @@
                                                     id="depreciation_value" x-model="asset.depreciation_value">
                                             </div>
                                             <div class="mb-3">
-                                                <label for="expected_lifespan" class="form-label">Expected Lifespan
+                                                <label for="expected_lifespan" class="form-label">Expected
+                                                    Lifespan
                                                     (years)</label>
                                                 <input type="number" class="form-control" id="expected_lifespan"
                                                     x-model="asset.expected_lifespan">
@@ -818,7 +886,8 @@
                                         <div class="tab-pane fade" id="v-pills-status" role="tabpanel">
                                             <h6 class="mb-3">Status and Criticality</h6>
                                             <div class="mb-3">
-                                                <label for="asset_status" class="form-label">Asset Status</label>
+                                                <label for="asset_status" class="form-label">Asset
+                                                    Status</label>
                                                 <select class="form-select" id="asset_status"
                                                     x-model="asset.asset_status">
                                                     <option value="">Select Status</option>
@@ -857,13 +926,15 @@
                                                     x-model="asset.responsible_department">
                                             </div>
                                             <div class="mb-3">
-                                                <label for="primary_contact_person" class="form-label">Primary Contact
+                                                <label for="primary_contact_person" class="form-label">Primary
+                                                    Contact
                                                     Person</label>
                                                 <input type="text" class="form-control" id="primary_contact_person"
                                                     x-model="asset.primary_contact_person">
                                             </div>
                                             <div class="mb-3">
-                                                <label for="backup_contact_person" class="form-label">Backup Contact
+                                                <label for="backup_contact_person" class="form-label">Backup
+                                                    Contact
                                                     Person</label>
                                                 <input type="text" class="form-control" id="backup_contact_person"
                                                     x-model="asset.backup_contact_person">
@@ -890,17 +961,20 @@
                                                     x-model="asset.connected_devices"></textarea>
                                             </div>
                                             <div class="mb-3">
-                                                <label for="failure_history" class="form-label">Failure History</label>
+                                                <label for="failure_history" class="form-label">Failure
+                                                    History</label>
                                                 <textarea class="form-control" id="failure_history"
                                                     x-model="asset.failure_history"></textarea>
                                             </div>
                                             <div class="mb-3">
-                                                <label for="created_date" class="form-label">Created Date</label>
+                                                <label for="created_date" class="form-label">Created
+                                                    Date</label>
                                                 <input type="date" class="form-control" id="created_date"
                                                     x-model="asset.created_date" readonly>
                                             </div>
                                             <div class="mb-3">
-                                                <label for="modified_date" class="form-label">Modified Date</label>
+                                                <label for="modified_date" class="form-label">Modified
+                                                    Date</label>
                                                 <input type="date" class="form-control" id="modified_date"
                                                     x-model="asset.modified_date" readonly>
                                             </div>
@@ -926,7 +1000,8 @@
             </div>
 
             <!-- Grid Modal -->
-            <div id="gridModal" class="modal fade" tabindex="-1" aria-labelledby="gridModalLabel" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+            <div id="gridModal" class="modal fade" tabindex="-1" aria-labelledby="gridModalLabel" aria-hidden="true"
+                data-bs-backdrop="static" data-bs-keyboard="false">
                 <div class="modal-dialog modal-fullscreen">
                     <div class="modal-content">
                         <div class="modal-header">

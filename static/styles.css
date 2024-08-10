@@ -220,3 +220,44 @@ body {
 #gridModal .modal-footer {
     justify-content: center;
 }
+.nav-pills .nav-link {
+    color: var(--primary-color);
+    border-radius: 0;
+    text-align: left;
+    padding: 10px 15px;
+}
+
+.nav-pills .nav-link.active {
+    background-color: var(--secondary-color);
+    color: var(--white-color);
+}
+
+.nav-pills .nav-link:hover:not(.active) {
+    background-color: rgba(50, 89, 133, 0.1);
+}
+
+.chart-container {
+    position: relative;
+    height: 60vh;
+    width: 100%;
+}
+
+#chartCanvas {
+    width: 100% !important;
+    height: 100% !important;
+}
+
+.btn-outline-primary {
+    color: var(--secondary-color);
+    border-color: var(--secondary-color);
+}
+
+.btn-outline-primary:hover {
+    background-color: var(--secondary-color);
+    color: var(--white-color);
+}
+
+.card {
+    height: calc(100vh - 100px);
+    overflow-y: auto;
+}
