@@ -43,7 +43,6 @@
                         <a class="nav-link" href="#">Reports</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#">SettCan you make them all aligned, ings</a>
                     </li>
                 </ul>
             </div>
@@ -539,59 +538,31 @@
 </div>
 
             <!-- Modal -->
-            <div id="assetModal" class="modal fade" tabindex="-1" aria-labelledby="assetModalLabel" aria-hidden="true"
-                data-bs-backdrop="static" x-data="assetModalData()">
+            <div id="assetModal" class="modal fade" tabindex="-1" aria-labelledby="assetModalLabel" aria-hidden="true" bs-backdrop="static" x-data="assetModalData()" x-init="init">
                 <div class="modal-dialog modal-xl">
-                    <div class="modal-content">
-                        <div class="modal-header bg-primary text-white">
-                            <h5 class="modal-title" id="assetModalLabel" x-text="asset.asset_type"></h5>
-                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
-                                aria-label="Close"></button>
+                  <div class="modal-content">
+                    <div class="modal-header bg-primary text-white">
+                      <h5 class="modal-title" id="assetModalLabel" x-text="asset.asset_type"></h5>
+                    </div>
+                    <div class="modal-body">
+                      <div class="row">
+                        <div class="col-md-3">
+                          <div class="nav flex-column nav-pills" id="assetModal-v-pills-tab" role="tablist" aria-orientation="vertical">
+                            <button class="nav-link active" id="assetModal-v-pills-identification-tab" data-bs-toggle="pill" data-bs-target="#assetModal-v-pills-identification" type="button" role="tab" aria-controls="assetModal-v-pills-identification" aria-selected="true">Asset Identification</button>
+                            <button class="nav-link" id="assetModal-v-pills-location-tab" data-bs-toggle="pill" data-bs-target="#assetModal-v-pills-location" type="button" role="tab" aria-controls="assetModal-v-pills-location" aria-selected="false">Location Information</button>
+                            <button class="nav-link" id="assetModal-v-pills-technical-tab" data-bs-toggle="pill" data-bs-target="#assetModal-v-pills-technical" type="button" role="tab" aria-controls="assetModal-v-pills-technical" aria-selected="false">Technical Specifications</button>
+                            <button class="nav-link" id="assetModal-v-pills-network-tab" data-bs-toggle="pill" data-bs-target="#assetModal-v-pills-network" type="button" role="tab" aria-controls="assetModal-v-pills-network" aria-selected="false">Network and Security</button>
+                            <button class="nav-link" id="assetModal-v-pills-maintenance-tab" data-bs-toggle="pill" data-bs-target="#assetModal-v-pills-maintenance" type="button" role="tab" aria-controls="assetModal-v-pills-maintenance" aria-selected="false">Maintenance and Support</button>
+                            <button class="nav-link" id="assetModal-v-pills-financial-tab" data-bs-toggle="pill" data-bs-target="#assetModal-v-pills-financial" type="button" role="tab" aria-controls="assetModal-v-pills-financial" aria-selected="false">Financial Information</button>
+                            <button class="nav-link" id="assetModal-v-pills-status-tab" data-bs-toggle="pill" data-bs-target="#assetModal-v-pills-status" type="button" role="tab" aria-controls="assetModal-v-pills-status" aria-selected="false">Status and Criticality</button>
+                            <button class="nav-link" id="assetModal-v-pills-responsibility-tab" data-bs-toggle="pill" data-bs-target="#assetModal-v-pills-responsibility" type="button" role="tab" aria-controls="assetModal-v-pills-responsibility" aria-selected="false">Responsibility and Compliance</button>
+                            <button class="nav-link" id="assetModal-v-pills-additional-tab" data-bs-toggle="pill" data-bs-target="#assetModal-v-pills-additional" type="button" role="tab" aria-controls="assetModal-v-pills-additional" aria-selected="false">Additional Information</button>
+                          </div>
                         </div>
-                        <div class="modal-body">
-                            <div class="row">
-                                <div class="col-md-3">
-                                    <div class="nav flex-column nav-pills" id="v-pills-tab" role="tablist"
-                                        aria-orientation="vertical">
-                                        <button class="nav-link active" id="v-pills-identification-tab"
-                                            data-bs-toggle="pill" data-bs-target="#v-pills-identification" type="button"
-                                            role="tab">Asset
-                                            Identification</button>
-                                        <button class="nav-link" id="v-pills-location-tab" data-bs-toggle="pill"
-                                            data-bs-target="#v-pills-location" type="button" role="tab">Location
-                                            Information</button>
-                                        <button class="nav-link" id="v-pills-technical-tab" data-bs-toggle="pill"
-                                            data-bs-target="#v-pills-technical" type="button" role="tab">Technical
-                                            Specifications</button>
-                                        <button class="nav-link" id="v-pills-network-tab" data-bs-toggle="pill"
-                                            data-bs-target="#v-pills-network" type="button" role="tab">Network
-                                            and
-                                            Security</button>
-                                        <button class="nav-link" id="v-pills-maintenance-tab" data-bs-toggle="pill"
-                                            data-bs-target="#v-pills-maintenance" type="button" role="tab">Maintenance
-                                            and
-                                            Support</button>
-                                        <button class="nav-link" id="v-pills-financial-tab" data-bs-toggle="pill"
-                                            data-bs-target="#v-pills-financial" type="button" role="tab">Financial
-                                            Information</button>
-                                        <button class="nav-link" id="v-pills-status-tab" data-bs-toggle="pill"
-                                            data-bs-target="#v-pills-status" type="button" role="tab">Status and
-                                            Criticality</button>
-                                        <button class="nav-link" id="v-pills-responsibility-tab" data-bs-toggle="pill"
-                                            data-bs-target="#v-pills-responsibility" type="button"
-                                            role="tab">Responsibility
-                                            and
-                                            Compliance</button>
-                                        <button class="nav-link" id="v-pills-additional-tab" data-bs-toggle="pill"
-                                            data-bs-target="#v-pills-additional" type="button" role="tab">Additional
-                                            Information</button>
-                                    </div>
-                                </div>
                                 <div class="col-md-9">
                                     <div class="tab-content" id="v-pills-tabContent">
-                                        <div class="tab-pane fade show active" id="v-pills-identification"
-                                            role="tabpanel">
-                                            <h6 class="mb-3">Asset Identification</h6>
+                                        <div id="v-pills-tabContent" class="tab-content">
+                                            <div class="tab-pane fade show active" id="assetModal-v-pills-identification" role="tabpanel" aria-labelledby="assetModal-v-pills-identification-tab">
                                             <div class="mb-3">
                                                 <label for="asset_type" class="form-label">Asset or
                                                     Component</label>
@@ -632,7 +603,7 @@
                                                     x-model="asset.manufacturer">
                                             </div>
                                         </div>
-                                        <div class="tab-pane fade" id="v-pills-location" role="tabpanel">
+                                        <div class="tab-pane fade" id="assetModal-v-pills-location" role="tabpanel" aria-labelledby="assetModal-v-pills-location-tab">
                                             <h6 class="mb-3">Location Information</h6>
                                             <div class="mb-3">
                                                 <label for="site_id" class="form-label">Site ID</label>
@@ -694,7 +665,7 @@
                                                 </select>
                                             </div>
                                         </div>
-                                        <div class="tab-pane fade" id="v-pills-technical" role="tabpanel">
+                                        <div class="tab-pane fade" id="assetModal-v-pills-technical" role="tabpanel" aria-labelledby="assetModal-v-pills-technical-tab">
                                             <h6 class="mb-3">Technical Specifications</h6>
                                             <div class="mb-3">
                                                 <label for="firmware_revision" class="form-label">Firmware
@@ -747,7 +718,7 @@
                                                     x-model="asset.communication_protocols">
                                             </div>
                                         </div>
-                                        <div class="tab-pane fade" id="v-pills-network" role="tabpanel">
+                                        <div class="tab-pane fade" id="assetModal-v-pills-network" role="tabpanel" aria-labelledby="assetModal-v-pills-network-tab">
                                             <h6 class="mb-3">Network and Security</h6>
                                             <div class="mb-3">
                                                 <label for="remote_access" class="form-label">Remote
@@ -808,7 +779,7 @@
                                                 </select>
                                             </div>
                                         </div>
-                                        <div class="tab-pane fade" id="v-pills-maintenance" role="tabpanel">
+                                        <div class="tab-pane fade" id="assetModal-v-pills-maintenance" role="tabpanel" aria-labelledby="assetModal-v-pills-maintenance-tab">
                                             <h6 class="mb-3">Maintenance and Support</h6>
                                             <div class="mb-3">
                                                 <label for="installation_date" class="form-label">Installation
@@ -871,7 +842,7 @@
                                                 </select>
                                             </div>
                                         </div>
-                                        <div class="tab-pane fade" id="v-pills-financial" role="tabpanel">
+                                        <div class="tab-pane fade" id="assetModal-v-pills-financial" role="tabpanel" aria-labelledby="assetModal-v-pills-financial-tab">
                                             <h6 class="mb-3">Financial Information</h6>
                                             <div class="mb-3">
                                                 <label for="purchase_cost" class="form-label">Purchase
@@ -893,7 +864,7 @@
                                                     x-model="asset.expected_lifespan">
                                             </div>
                                         </div>
-                                        <div class="tab-pane fade" id="v-pills-status" role="tabpanel">
+                                        <div class="tab-pane fade" id="assetModal-v-pills-status" role="tabpanel" aria-labelledby="assetModal-v-pills-status-tab">
                                             <h6 class="mb-3">Status and Criticality</h6>
                                             <div class="mb-3">
                                                 <label for="asset_status" class="form-label">Asset
@@ -927,7 +898,7 @@
                                                 </select>
                                             </div>
                                         </div>
-                                        <div class="tab-pane fade" id="v-pills-responsibility" role="tabpanel">
+                                        <div class="tab-pane fade" id="assetModal-v-pills-responsibility" role="tabpanel" aria-labelledby="assetModal-v-pills-responsibility-tab">
                                             <h6 class="mb-3">Responsibility and Compliance</h6>
                                             <div class="mb-3">
                                                 <label for="responsible_department" class="form-label">Responsible
@@ -956,7 +927,7 @@
                                                     x-model="asset.compliance_requirements"></textarea>
                                             </div>
                                         </div>
-                                        <div class="tab-pane fade" id="v-pills-additional" role="tabpanel">
+                                        <div class="tab-pane fade" id="assetModal-v-pills-additional" role="tabpanel" aria-labelledby="assetModal-v-pills-additional-tab">
                                             <h6 class="mb-3">Additional Information</h6>
                                             <div class="mb-3">
                                                 <label for="custom_configurations" class="form-label">Custom
@@ -1065,7 +1036,7 @@
                     </div>
                 </div>
             </div>
-
+</div>
             <div class="container-fluid mt-4">
                 <div class="row">
                     <!-- IoTix Network Scan -->
